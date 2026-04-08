@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>LAVAÍ Expansion Engine | Índice de Verticalização (Prédios vs Casas)</title>
+  <title>LAVAÍ Expansion Engine | Índice de Verticalização</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -29,7 +29,7 @@
       position: absolute;
       top: 24px;
       left: 24px;
-      width: 540px;
+      width: 500px;
       background: var(--glass-bg);
       backdrop-filter: blur(16px);
       border-radius: var(--radius-xl);
@@ -196,32 +196,6 @@
       color: #6b21a5;
       text-align: center;
     }
-    .proporcao-container {
-      display: flex;
-      gap: 15px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-    .proporcao-item {
-      flex: 1;
-      background: white;
-      border-radius: 8px;
-      padding: 8px;
-      text-align: center;
-    }
-    .proporcao-numero {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .proporcao-label {
-      font-size: 0.65rem;
-      color: #64748b;
-    }
-    .cdhu-count {
-      background: #fee2e2;
-      border: 1px solid #dc2626;
-    }
 
     .analise-card {
       margin-top: 16px;
@@ -261,7 +235,6 @@
       .counter-container { flex-direction: column; }
       .raio-buttons { flex-direction: column; }
       .indice-container { flex-direction: column; }
-      .proporcao-container { flex-direction: column; }
     }
   </style>
 </head>
@@ -276,7 +249,7 @@
       </div>
       <span>Expansion</span>
     </h2>
-    <p>Índice de Verticalização · Prédios vs Casas · Raio Ajustável</p>
+    <p>Índice de Verticalização · CDHU/COHAB · Raio Ajustável</p>
   </div>
   
   <div class="panel-body">
@@ -331,10 +304,10 @@
       </div>
     </div>
 
-    <!-- Card do Índice de Verticalização Real (Prédios vs Casas) -->
+    <!-- Card do Índice de Verticalização -->
     <div id="verticalizacaoCard" class="verticalizacao-card" style="display: none;">
       <div class="verticalizacao-title">
-        <span>🏢 ÍNDICE DE VERTICALIZAÇÃO (Prédios vs Casas)</span>
+        <span>🏢 ÍNDICE DE VERTICALIZAÇÃO</span>
         <span id="verticalizacaoStatusIcon">📊</span>
       </div>
       <div class="indice-container">
@@ -342,20 +315,6 @@
           <div class="indice-progresso" id="indiceProgresso"></div>
         </div>
         <div class="indice-valor" id="indiceValor">0%</div>
-      </div>
-      <div class="proporcao-container">
-        <div class="proporcao-item">
-          <div class="proporcao-numero" id="qtdPredios">0</div>
-          <div class="proporcao-label">🏢 Prédios/Edifícios</div>
-        </div>
-        <div class="proporcao-item cdhu-count">
-          <div class="proporcao-numero" id="qtdCDHU">0</div>
-          <div class="proporcao-label">🔥 CDHU/COHAB</div>
-        </div>
-        <div class="proporcao-item">
-          <div class="proporcao-numero" id="qtdCasas">0</div>
-          <div class="proporcao-label">🏠 Casas Residenciais</div>
-        </div>
       </div>
       <div id="verticalizacaoDetalhe" style="margin-top: 8px; font-size: 0.7rem; background: white; padding: 8px; border-radius: 8px;"></div>
     </div>
@@ -380,9 +339,9 @@
       <div class="legend-title">🎯 PRIORIDADE LAVAÍ</div>
       <div class="legend-items">
         <div class="legend-item"><div class="legend-marker alta">🔥</div><span><strong>PRIORIDADE ALTA</strong> — Classes C/D/E (público-alvo)</span></div>
-        <div class="legend-item"><div class="legend-marker cdhu">🏘️</div><span><strong>CDHU/COHAB</strong> — Somam ao índice como prédios</span></div>
+        <div class="legend-item"><div class="legend-marker cdhu">🏘️</div><span><strong>CDHU/COHAB</strong> — PRIORIDADE MÁXIMA</span></div>
       </div>
-      <div class="badge-tip">📊 Índice de Verticalização = (Prédios + CDHU/COHAB) / (Prédios + CDHU/COHAB + Casas) × 100. Exclui lojas e comércios.</div>
+      <div class="badge-tip">📊 Índice de Verticalização = (Prédios + CDHU/COHAB) / Total de Imóveis Residenciais × 100. Quanto maior, mais moradores de apartamento.</div>
     </div>
   </div>
 </div>
@@ -396,7 +355,7 @@
 <script>
   // ==============================================================
   // ÍNDICE DE VERTICALIZAÇÃO - APENAS PRÉDIOS vs CASAS
-  // Exclui lojas, comércios e outros estabelecimentos
+  // Mantém ícones no mapa mas NÃO mostra quantidades no quadro
   // ==============================================================
   
   let map, service, geocoder;
@@ -446,20 +405,20 @@
     "cdhu sp", "habitação social", "conjunto residencial"
   ];
 
-  // 🔥 TERMOS APENAS PARA PRÉDIOS RESIDENCIAIS
+  // Termos para PRÉDIOS
   const termosPredios = [
     "edifício residencial", "prédio", "condomínio", "apartamento", 
     "torre residencial", "bloco", "edifício", "residencial",
     "condomínio residencial", "complexo residencial"
   ];
 
-  // 🔥 TERMOS APENAS PARA CASAS (exclui comércios)
+  // Termos para CASAS
   const termosCasas = [
     "casa residencial", "casa", "sobrado", "residência térrea",
     "casa térrea", "casa de vila", "casa germinada"
   ];
 
-  // Palavras para EXCLUIR (comércios, lojas, etc)
+  // Palavras para EXCLUIR (comércios)
   const termosExclusao = [
     "loja", "comércio", "mercado", "padaria", "farmácia", "restaurante",
     "escola", "supermercado", "shopping", "escritório", "comercial"
@@ -467,34 +426,22 @@
 
   function isCasaResidencial(nome) {
     const nomeLower = nome.toLowerCase();
-    // Exclui se for comércio
     for (let termo of termosExclusao) {
-      if (nomeLower.includes(termo)) {
-        return false;
-      }
+      if (nomeLower.includes(termo)) return false;
     }
-    // Verifica se é casa
     for (let termo of termosCasas) {
-      if (nomeLower.includes(termo)) {
-        return true;
-      }
+      if (nomeLower.includes(termo)) return true;
     }
     return false;
   }
 
   function isPredioResidencial(nome) {
     const nomeLower = nome.toLowerCase();
-    // Exclui se for comércio
     for (let termo of termosExclusao) {
-      if (nomeLower.includes(termo)) {
-        return false;
-      }
+      if (nomeLower.includes(termo)) return false;
     }
-    // Verifica se é prédio
     for (let termo of termosPredios) {
-      if (nomeLower.includes(termo)) {
-        return true;
-      }
+      if (nomeLower.includes(termo)) return true;
     }
     return false;
   }
@@ -575,7 +522,6 @@
     heatmapLayer.setMap(map);
   }
 
-  // Buscar CDHU/COHAB
   function buscarCDHU() {
     if (!centroAtual) {
       alert("⚠️ Localize um endereço primeiro.");
@@ -624,7 +570,7 @@
                 
                 marker.addListener("click", () => {
                   new google.maps.InfoWindow({
-                    content: `<b>🏘️ ${p.name}</b><br>📍 ${p.vicinity}<br>📏 Distância: ${Math.round(distancia)}m<br><br><span style="color:#dc2626; font-weight:bold;">🔥 CDHU/COHAB - PRIORIDADE MÁXIMA</span><br><small>Contabilizado como PRÉDIO no índice de verticalização</small>`
+                    content: `<b>🏘️ ${p.name}</b><br>📍 ${p.vicinity}<br>📏 Distância: ${Math.round(distancia)}m<br><br><span style="color:#dc2626; font-weight:bold;">🔥 CDHU/COHAB - PRIORIDADE MÁXIMA</span>`
                   }).open(map, marker);
                 });
                 todosMarcadores.push(marker);
@@ -646,7 +592,7 @@
     });
   }
 
-  // 🔥 FUNÇÃO PRINCIPAL CORRIGIDA - APENAS PRÉDIOS vs CASAS
+  // Função principal para calcular índice de verticalização
   function calcularIndiceVerticalizacao() {
     if (!centroAtual) {
       alert("⚠️ Localize um endereço primeiro.");
@@ -668,9 +614,9 @@
     document.getElementById("verticalizacaoCard").style.display = "block";
     document.getElementById("indiceProgresso").style.width = "0%";
     document.getElementById("indiceValor").innerHTML = "0%";
-    document.getElementById("verticalizacaoDetalhe").innerHTML = "⏳ Buscando imóveis residenciais na região...";
+    document.getElementById("verticalizacaoDetalhe").innerHTML = "⏳ Analisando região...";
     
-    // 🔥 BUSCA PRÉDIOS RESIDENCIAIS
+    // Busca PRÉDIOS
     let prediosTemp = [];
     let buscaPrediosConcluida = 0;
     let totalTermosPredios = termosPredios.length;
@@ -710,19 +656,19 @@
             const distancia = google.maps.geometry.spherical.computeDistanceBetween(centroAtual, p.geometry.location);
             marker.addListener("click", () => {
               new google.maps.InfoWindow({
-                content: `<b>🏢 ${p.name}</b><br>📍 ${p.vicinity}<br>📏 Distância: ${Math.round(distancia)}m<br><br><small>Prédio Residencial - Contribui para verticalização</small>`
+                content: `<b>🏢 ${p.name}</b><br>📍 ${p.vicinity}<br>📏 Distância: ${Math.round(distancia)}m<br><br><small>Prédio Residencial</small>`
               }).open(map, marker);
             });
             todosMarcadores.push(marker);
           });
           
           buscasConcluidas++;
-          finalizarCalculoVerticalizacao();
+          finalizarCalculo();
         }
       });
     });
     
-    // 🔥 BUSCA APENAS CASAS (exclui comércios)
+    // Busca CASAS
     let casasTemp = [];
     let buscaCasasConcluida = 0;
     let totalTermosCasas = termosCasas.length;
@@ -762,39 +708,33 @@
             const distancia = google.maps.geometry.spherical.computeDistanceBetween(centroAtual, p.geometry.location);
             marker.addListener("click", () => {
               new google.maps.InfoWindow({
-                content: `<b>🏠 ${p.name}</b><br>📍 ${p.vicinity}<br>📏 Distância: ${Math.round(distancia)}m<br><br><small>Casa Residencial - Contribui para horizontalização</small>`
+                content: `<b>🏠 ${p.name}</b><br>📍 ${p.vicinity}<br>📏 Distância: ${Math.round(distancia)}m<br><br><small>Casa Residencial</small>`
               }).open(map, marker);
             });
             todosMarcadores.push(marker);
           });
           
           buscasConcluidas++;
-          finalizarCalculoVerticalizacao();
+          finalizarCalculo();
         }
       });
     });
     
-    function finalizarCalculoVerticalizacao() {
+    function finalizarCalculo() {
       if (buscasConcluidas < totalBuscas) return;
       
-      // 🔥 TOTAL DE PRÉDIOS = prédios residenciais + CDHU/COHAB
       const totalPredios = prediosEncontrados.length + cdhuEncontrados.length;
       const totalCasas = casasEncontradas.length;
       const totalImoveisResidenciais = totalPredios + totalCasas;
       
-      // ÍNDICE DE VERTICALIZAÇÃO = (Prédios + CDHU/COHAB) / Total de Imóveis Residenciais × 100
       let indice = 0;
       if (totalImoveisResidenciais > 0) {
         indice = (totalPredios / totalImoveisResidenciais) * 100;
       }
       indiceVerticalizacao = Math.round(indice);
       
-      // Atualiza interface
       document.getElementById("indiceProgresso").style.width = indiceVerticalizacao + "%";
       document.getElementById("indiceValor").innerHTML = indiceVerticalizacao + "%";
-      document.getElementById("qtdPredios").innerHTML = prediosEncontrados.length;
-      document.getElementById("qtdCDHU").innerHTML = cdhuEncontrados.length;
-      document.getElementById("qtdCasas").innerHTML = totalCasas;
       
       let classificacao = "";
       let recomendacao = "";
@@ -802,7 +742,7 @@
       
       if (indiceVerticalizacao >= 60) {
         classificacao = "🏙️ ALTAMENTE VERTICALIZADA";
-        recomendacao = "🔥 EXCELENTE para lavanderias! Muitos moradores de apartamento (incluindo CDHU/COHAB) não têm máquina própria.";
+        recomendacao = "🔥 EXCELENTE para lavanderias! Muitos moradores de apartamento não têm máquina própria.";
         cor = "#16a34a";
       } else if (indiceVerticalizacao >= 35) {
         classificacao = "🏢 MEDIANAMENTE VERTICALIZADA";
@@ -810,15 +750,14 @@
         cor = "#eab308";
       } else {
         classificacao = "🏠 PREDOMINANTEMENTE HORIZONTAL";
-        recomendacao = "⚠️ Predomínio de casas. Público pode ter máquina própria. Avaliar CDHU/COHAB na região.";
+        recomendacao = "⚠️ Predomínio de casas. Avaliar CDHU/COHAB na região.";
         cor = "#dc2626";
       }
       
       document.getElementById("verticalizacaoDetalhe").innerHTML = `
         <strong style="color: ${cor};">${classificacao}</strong><br>
-        📊 Proporção residencial: ${totalPredios} prédios (${prediosEncontrados.length} edifícios + ${cdhuEncontrados.length} CDHU/COHAB) : ${totalCasas} casas<br>
         🎯 ${recomendacao}<br>
-        <small>💰 Índice de Verticalização = (Prédios + CDHU/COHAB) / Total de Imóveis Residenciais × 100<br>🏪 Lojas e comércios NÃO entram no cálculo</small>
+        <small>📊 Índice calculado com base na proporção entre prédios e casas residenciais</small>
       `;
     }
   }
@@ -1094,8 +1033,6 @@
           prioridade: prioridade,
           verticalizacao: indiceVerticalizacao + "%",
           cdhu: cdhuEncontrados.length,
-          predios: prediosEncontrados.length,
-          casas: casasEncontradas.length,
           lat: s.geometry.location.lat(),
           lng: s.geometry.location.lng()
         });
@@ -1140,16 +1077,14 @@
     
     const dados = melhoresPontos.map((p, i) => ({
       "#": i + 1,
-      "Nome do Estabelecimento": p.nome,
+      "Nome": p.nome,
       "Endereço": p.endereco,
       "⭐ Rating": p.rating,
       "🗣 Reviews": p.reviews,
       "🎯 PRIORIDADE": p.prioridade,
       "🏆 Score": p.score,
-      "🏢 Índice Verticalização": p.verticalizacao,
-      "🏢 Prédios": p.predios,
+      "🏢 Verticalização": p.verticalizacao,
       "🔥 CDHU/COHAB": p.cdhu,
-      "🏠 Casas": p.casas,
       "📍 Latitude": p.lat,
       "📍 Longitude": p.lng
     }));
@@ -1157,7 +1092,7 @@
     const ws = XLSX.utils.json_to_sheet(dados);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Melhores Pontos LAVAÍ");
-    XLSX.writeFile(wb, `LAVAI_verticalizacao_${getRaioDisplay()}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+    XLSX.writeFile(wb, `LAVAI_${getRaioDisplay()}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
     alert(`📊 Excel exportado com ${melhoresPontos.length} pontos!`);
   }
 
@@ -1172,14 +1107,12 @@
     const info = getClassePorRegiao(centroAtual.lat(), centroAtual.lng());
     
     doc.setFontSize(18);
-    doc.text("LAVAÍ Expansion Engine - Índice de Verticalização (Prédios vs Casas)", 14, 20);
+    doc.text("LAVAÍ Expansion Engine - Relatório", 14, 20);
     doc.setFontSize(10);
     doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 30);
     doc.text(`Região: ${document.getElementById("endereco").value}`, 14, 37);
     doc.text(`Raio: ${getRaioDisplay()} | Classe: ${info.classe} | Prioridade: ${info.prioridade}`, 14, 44);
     doc.text(`🏢 Índice de Verticalização: ${indiceVerticalizacao}% | 🔥 CDHU/COHAB: ${cdhuEncontrados.length}`, 14, 51);
-    doc.text(`📊 Proporção residencial: ${prediosEncontrados.length + cdhuEncontrados.length} prédios : ${casasEncontradas.length} casas`, 14, 58);
-    doc.text(`🏪 Lojas e comércios NÃO entram no cálculo`, 14, 65);
     
     const headers = [["#", "Estabelecimento", "Endereço", "Rating", "Reviews", "PRIORIDADE", "Score"]];
     const rows = melhoresPontos.map((p, i) => [
@@ -1195,13 +1128,13 @@
     doc.autoTable({
       head: headers,
       body: rows,
-      startY: 72,
+      startY: 58,
       theme: 'striped',
       headStyles: { fillColor: [15, 23, 42], textColor: 255, fontSize: 8 },
       bodyStyles: { fontSize: 7 }
     });
     
-    doc.save(`LAVAI_verticalizacao_${getRaioDisplay()}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`);
+    doc.save(`LAVAI_${getRaioDisplay()}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`);
     alert(`📄 PDF exportado com ${melhoresPontos.length} pontos!`);
   }
 
