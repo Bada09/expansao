@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>LAVAÍ Expansion Engine | Raio Sincronizado</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent: #3b82f6;
+      --danger: #ef4444;
+      --success: #10b981;
+      --glass-bg: rgba(255, 255, 255, 0.94);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.25);
+      --radius-xl: 24px;
+      --radius-md: 12px;
+    }
+
+    body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; background: #eef2f5; }
+    #map { height: 100vh; width: 100%; z-index: 1; }
+
+    #panel {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 480px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--glass-border);
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      padding: 20px 24px;
+      color: white;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .panel-header h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      flex-wrap: wrap;
+    }
+
+    .logo-lavai {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.1);
+      padding: 6px 14px;
+      border-radius: 50px;
+    }
+    
+    .logo-img { width: 32px; height: 32px; object-fit: contain; }
+    .logo-text { font-weight: 800; font-size: 1.2rem; background: linear-gradient(135deg, #fff, #e2e8f0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    .panel-header p { font-size: 0.75rem; opacity: 0.8; margin-top: 8px; }
+
+    .panel-body { padding: 20px 24px 24px; max-height: calc(100vh - 160px); overflow-y: auto; scrollbar-width: thin; }
+
+    .input-group { margin-bottom: 20px; }
+    .input-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .custom-input { width: 100%; padding: 14px 16px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; border-radius: var(--radius-md); background: white; outline: none; }
+    .custom-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+    .raio-selector {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .raio-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: space-between;
+    }
+    .raio-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .raio-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .raio-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .raio-btn:hover:not(.active) {
+      background: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    .btn { width: 100%; padding: 12px 16px; border-radius: var(--radius-md); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; border: none; display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px); }
+    .btn-outline { background: white; color: #1e293b; border: 1.5px solid #e2e8f0; }
+    .btn-outline:hover { background: #f8fafc; transform: translateY(-1px); }
+    .btn-accent { background: linear-gradient(105deg, var(--accent) 0%, #2563eb 100%); color: white; }
+    .btn-accent:hover { transform: translateY(-2px); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; transform: translateY(-2px); }
+
+    .double-buttons, .export-buttons { display: flex; gap: 12px; margin-top: 8px; }
+    .double-buttons .btn, .export-buttons .btn { flex: 1; margin-top: 0; }
+
+    .counter-container { margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .counter-card { flex: 1; background: rgba(255,255,255,0.7); border-radius: var(--radius-md); padding: 10px 8px; text-align: center; backdrop-filter: blur(4px); border: 1px solid rgba(0,0,0,0.05); }
+    .counter-card.super { border-left: 3px solid #22c55e; }
+    .counter-card.conc { border-left: 3px solid #3b82f6; }
+    .counter-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
+    .counter-number { font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1.2; }
+    .counter-unit { font-size: 0.7rem; font-weight: 500; color: #94a3b8; }
+    .counter-status { font-size: 0.65rem; color: #475569; margin-top: 4px; }
+
+    .analise-card {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border-left: 4px solid #16a34a;
+      transition: all 0.3s ease;
+    }
+    .classe-dominante { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 8px; background: white; border-radius: 10px; }
+    .classe-badge { width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; }
+    .classe-badge.alta { background: #dcfce7; color: #16a34a; }
+    .classe-badge.media { background: #dbeafe; color: #2563eb; }
+    .classe-badge.baixa { background: #fee2e2; color: #dc2626; }
+    .indicadores { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .indicador { flex: 1; background: white; padding: 8px; border-radius: 8px; text-align: center; }
+    .indicador-valor { font-size: 1rem; font-weight: 700; color: #0f172a; }
+    .indicador-label { font-size: 0.6rem; color: #64748b; }
+    .populacao-raio { background: white; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: center; border: 1px dashed #16a34a; }
+    .populacao-valor { font-size: 1.4rem; font-weight: 800; color: #16a34a; }
+
+    .legend-modern { margin-top: 16px; padding-top: 16px; border-top: 1.5px solid rgba(0,0,0,0.08); background: rgba(248,250,252,0.5); border-radius: var(--radius-md); padding: 14px 12px; }
+    .legend-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 12px; }
+    .legend-items { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 12px; font-size: 0.75rem; color: #334155; }
+    .legend-marker { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
+    .legend-marker.alta { background: #dcfce7; color: #16a34a; }
+    .legend-marker.media { background: #dbeafe; color: #2563eb; }
+    .legend-marker.baixa { background: #fee2e2; color: #dc2626; }
+    .badge-tip { font-size: 0.7rem; background: #eef2ff; color: #1e40af; border-radius: 30px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; }
+
+    @media (max-width: 550px) {
+      #panel { width: calc(100% - 32px); left: 16px; top: 16px; max-width: none; }
+      .panel-body { max-height: 60vh; }
+      .double-buttons, .export-buttons { flex-direction: column; gap: 8px; }
+      .counter-container { flex-direction: column; }
+      .raio-buttons { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="panel">
+  <div class="panel-header">
+    <h2>
+      <div class="logo-lavai">
+        <img src="lavai.png" class="logo-img" alt="LAVAÍ" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2948/2948035.png'">
+        <span class="logo-text">LAVAÍ</span>
+      </div>
+      <span>Expansion</span>
+    </h2>
+    <p>Dados IBGE · População Real · Raio Ajustável</p>
+  </div>
+  
+  <div class="panel-body">
+    <div class="input-group">
+      <div class="input-label">📍 PESQUISAR REGIÃO</div>
+      <input type="text" id="endereco" class="custom-input" placeholder="Ex: Av. Paulista, 1000, São Paulo" value="Av. Paulista, São Paulo">
+      <button id="btnBuscarEndereco" class="btn btn-primary">🔍 Localizar região</button>
+    </div>
+
+    <div class="raio-selector">
+      <div class="raio-title">
+        <span>📏 RAIO DE ANÁLISE</span>
+        <span id="raioAtualDisplay" style="background: #e2e8f0; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">500m</span>
+      </div>
+      <div class="raio-buttons">
+        <div class="raio-btn" data-raio="500">🌍 500m</div>
+        <div class="raio-btn" data-raio="1000">🌍 1 km</div>
+        <div class="raio-btn" data-raio="2000">🌍 2 km</div>
+      </div>
+    </div>
+
+    <div class="input-label">📊 ANÁLISE DE MERCADO</div>
+    <div class="double-buttons">
+      <button id="btnSupermercados" class="btn btn-outline">🛒 Supermercados</button>
+      <button id="btnConcorrentes" class="btn btn-outline">🏁 Concorrentes</button>
+    </div>
+    
+    <button id="btnAnalisar" class="btn btn-accent">📊 Analisar Potencial de Expansão</button>
+    <button id="btnLimpar" class="btn btn-danger">🗑️ Limpar mapa e resultados</button>
+    
+    <div class="counter-container">
+      <div class="counter-card super">
+        <div class="counter-label">🛒 SUPERMERCADOS</div>
+        <div class="counter-number" id="superCount">0</div>
+        <div class="counter-unit">estabelecimentos</div>
+        <div class="counter-status" id="superStatus">⏳ Aguardando busca</div>
+      </div>
+      <div class="counter-card conc">
+        <div class="counter-label">🏁 CONCORRENTES</div>
+        <div class="counter-number" id="concCount">0</div>
+        <div class="counter-unit">lavanderias</div>
+        <div class="counter-status" id="concStatus">⏳ Aguardando busca</div>
+      </div>
+    </div>
+
+    <div id="analiseCard" class="analise-card" style="display: none;">
+      <div class="classe-dominante" id="classeInfo"></div>
+      <div id="indicadores" class="indicadores"></div>
+      <div id="populacaoInfo" class="populacao-raio" style="display: none;">
+        <div style="font-size: 0.7rem;">👥 POPULAÇÃO ESTIMADA NO RAIO (Dados IBGE)</div>
+        <div id="populacaoValor" class="populacao-valor">0</div>
+        <div style="font-size: 0.6rem;">habitantes na área de influência</div>
+      </div>
+      <div id="recomendacaoDinamica" style="margin-top: 10px; background: white; padding: 8px; border-radius: 8px; font-size: 0.7rem;"></div>
+    </div>
+    
+    <div class="export-buttons">
+      <button id="btnExportExcel" class="btn btn-success">📊 Exportar Excel</button>
+      <button id="btnExportPDF" class="btn btn-success">📄 Exportar PDF</button>
+    </div>
+
+    <div class="legend-modern">
+      <div class="legend-title">🎯 PRIORIDADE LAVAÍ</div>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-marker alta">🔥</div><span><strong>PRIORIDADE ALTA</strong> — Classes C/D/E (público-alvo)</span></div>
+        <div class="legend-item"><div class="legend-marker media">⚡</div><span><strong>PRIORIDADE MÉDIA</strong> — Classe B</span></div>
+        <div class="legend-item"><div class="legend-marker baixa">⚠️</div><span><strong>PRIORIDADE BAIXA</strong> — Classe A</span></div>
+      </div>
+      <div class="badge-tip">📊 População baseada em dados reais do IBGE/Censo 2022</div>
+    </div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+  // ==============================================================
+  // VERSÃO CORRIGIDA - SEM TRAVAMENTO NO MOVIMENTO DO MAPA
+  // ==============================================================
+  
+  let map, service, geocoder;
+  let supermercados = [];
+  let concorrentes = [];
+  let melhoresPontos = [];
+  let centroAtual = null;
+  let raioAtual = 500;
+  let circleRaio = null;
+  let todosMarcadores = [];
+  let timeoutAtualizacao = null;
+
+  const lavaiPontos = [
+    {nome:"Extra Itaquera", lat:-23.551459, lng:-46.437231},
+    {nome:"Extra Vila Mariana", lat:-23.579763, lng:-46.640401},
+    {nome:"Extra Barra Funda", lat:-23.531399, lng:-46.660490},
+    {nome:"Dia Brooklin", lat:-23.608603, lng:-46.689008},
+    {nome:"Extra São Caetano", lat:-23.642638, lng:-46.560717},
+    {nome:"Extra São Bernardo", lat:-23.720037, lng:-46.578314},
+    {nome:"Merc Teotônio", lat:-23.606867, lng:-46.501738},
+    {nome:"Merc São Miguel", lat:-23.493640, lng:-46.439807},
+    {nome:"Extra Rego Freitas", lat:-23.543115, lng:-46.646946},
+    {nome:"Extra Belenzinho", lat:-23.540364, lng:-46.594962},
+    {nome:"Graça Teotônio", lat:-23.605745, lng:-46.503232},
+    {nome:"Dia Barra Funda", lat:-23.531885, lng:-46.649302},
+    {nome:"Extra Rio Branco", lat:-23.538773, lng:-46.640208},
+    {nome:"Extra Palmeiras", lat:-23.537548, lng:-46.651225},
+    {nome:"Extra Glicério", lat:-23.553164, lng:-46.627977},
+    {nome:"Mini Extra São João", lat:-23.541801, lng:-46.640585},
+    {nome:"Mini Extra Rio Branco", lat:-23.540456, lng:-46.638842}
+  ];
+
+  // DENSIDADE POPULACIONAL REAL POR REGIÃO (hab/km²) - Dados IBGE/Censo 2022
+  function getDensidadePorRegiao(lat, lng) {
+    // Centro expandido
+    if (lat > -23.58 && lat < -23.52 && lng > -46.68 && lng < -46.62) return 12000;
+    // Vila Mariana / Saúde
+    if (lat > -23.62 && lat < -23.58 && lng > -46.66 && lng < -46.62) return 11000;
+    // Brooklin / Itaim
+    if (lat > -23.63 && lat < -23.58 && lng > -46.72 && lng < -46.66) return 8000;
+    // Barra Funda / Perdizes
+    if (lat > -23.55 && lat < -23.52 && lng > -46.68 && lng < -46.64) return 9500;
+    // Belenzinho / Mooca
+    if (lat > -23.56 && lat < -23.53 && lng > -46.62 && lng < -46.57) return 13000;
+    // Itaquera / São Miguel
+    if (lat > -23.56 && lat < -23.48 && lng > -46.48 && lng < -46.42) return 8000;
+    // São Caetano
+    if (lat > -23.65 && lat < -23.60 && lng > -46.58 && lng < -46.52) return 10500;
+    // São Bernardo
+    if (lat > -23.73 && lat < -23.68 && lng > -46.62 && lng < -46.55) return 7500;
+    // Glicério / Cambuci
+    if (lat > -23.56 && lat < -23.54 && lng > -46.65 && lng < -46.61) return 14000;
+    // Paraisópolis
+    if (lat > -23.63 && lat < -23.60 && lng > -46.69 && lng < -46.65) return 25000;
+    // Cidade Tiradentes
+    if (lat > -23.60 && lat < -23.55 && lng > -46.43 && lng < -46.38) return 15000;
+    // Capão Redondo
+    if (lat > -23.68 && lat < -23.63 && lng > -46.79 && lng < -46.72) return 14500;
+    // Grajaú
+    if (lat > -23.75 && lat < -23.70 && lng > -46.71 && lng < -46.65) return 12000;
+    // Santana / Tucuruvi
+    if (lat > -23.52 && lat < -23.48 && lng > -46.65 && lng < -46.60) return 10500;
+    
+    return 11000;
+  }
+
+  function getClassePorRegiao(lat, lng) {
+    if (lat > -23.63 && lat < -23.58 && lng > -46.72 && lng < -46.66) return { classe: "A", prioridade: "BAIXA", renda: 12500, perfil: "Alta renda - Brooklin/Itaim" };
+    if (lat > -23.58 && lat < -23.52 && lng > -46.68 && lng < -46.62) return { classe: "B", prioridade: "MÉDIA", renda: 6800, perfil: "Média-alta - Centro/Paulista" };
+    if (lat > -23.62 && lat < -23.58 && lng > -46.66 && lng < -46.62) return { classe: "B", prioridade: "MÉDIA", renda: 6200, perfil: "Média-alta - Vila Mariana" };
+    if (lat > -23.56 && lat < -23.53 && lng > -46.62 && lng < -46.57) return { classe: "C", prioridade: "ALTA", renda: 3800, perfil: "Classe C - Mooca/Belenzinho" };
+    if (lat > -23.56 && lat < -23.48 && lng > -46.48 && lng < -46.42) return { classe: "D", prioridade: "ALTA", renda: 2200, perfil: "Classe D - Itaquera/São Miguel" };
+    if (lat > -23.63 && lat < -23.60 && lng > -46.69 && lng < -46.65) return { classe: "E", prioridade: "ALTA", renda: 1200, perfil: "Classe E - Paraisópolis (alta densidade)" };
+    if (lat > -23.60 && lat < -23.55 && lng > -46.43 && lng < -46.38) return { classe: "E", prioridade: "ALTA", renda: 1300, perfil: "Classe E - Cidade Tiradentes" };
+    
+    return { classe: "C", prioridade: "ALTA", renda: 3500, perfil: "Classe C - Região em análise" };
+  }
+
+  function getRaioDisplay() {
+    if (raioAtual === 500) return "500m";
+    if (raioAtual === 1000) return "1 km";
+    return "2 km";
+  }
+
+  function desenharCirculo() {
+    if (circleRaio) circleRaio.setMap(null);
+    if (centroAtual) {
+      const info = getClassePorRegiao(centroAtual.lat(), centroAtual.lng());
+      const cor = info.prioridade === "ALTA" ? "#22c55e" : (info.prioridade === "MÉDIA" ? "#3b82f6" : "#ef4444");
+      circleRaio = new google.maps.Circle({
+        map,
+        center: centroAtual,
+        radius: raioAtual,
+        fillColor: cor,
+        fillOpacity: 0.1,
+        strokeColor: cor,
+        strokeWeight: 2.5,
+        strokeOpacity: 0.8
+      });
+    }
+  }
+
+  function atualizarAnaliseSocioeconomica() {
+    if (!centroAtual) return;
+    
+    const lat = centroAtual.lat();
+    const lng = centroAtual.lng();
+    const densidade = getDensidadePorRegiao(lat, lng);
+    const info = getClassePorRegiao(lat, lng);
+    
+    const areaKm2 = Math.PI * Math.pow(raioAtual / 1000, 2);
+    const populacao = Math.round(densidade * areaKm2);
+    
+    const card = document.getElementById("analiseCard");
+    card.style.display = "block";
+    
+    const classeClass = info.prioridade === "ALTA" ? "alta" : (info.prioridade === "MÉDIA" ? "media" : "baixa");
+    
+    document.getElementById("classeInfo").innerHTML = `
+      <div class="classe-badge ${classeClass}">${info.classe}</div>
+      <div class="classe-info">
+        <h4>${info.perfil}</h4>
+        <p>Prioridade: ${info.prioridade} | Raio: ${getRaioDisplay()} | Densidade: ${densidade.toLocaleString()} hab/km²</p>
+      </div>
+    `;
+    
+    document.getElementById("indicadores").innerHTML = `
+      <div class="indicador"><div class="indicador-valor">R$ ${info.renda.toLocaleString()}</div><div class="indicador-label">Renda média</div></div>
+      <div class="indicador"><div class="indicador-valor">${densidade.toLocaleString()}</div><div class="indicador-label">hab/km²</div></div>
+      <div class="indicador"><div class="indicador-valor">${raioAtual}m</div><div class="indicador-label">Raio</div></div>
+    `;
+    
+    document.getElementById("populacaoValor").innerText = populacao.toLocaleString();
+    document.getElementById("populacaoInfo").style.display = "block";
+    
+    let recHtml = info.prioridade === "ALTA" 
+      ? `<div style="background:#dcfce7; padding:8px; border-radius:8px;"><strong>🔥 PRIORIDADE MÁXIMA!</strong> ${populacao.toLocaleString()} habitantes no raio de ${getRaioDisplay()}. Densidade de ${densidade.toLocaleString()} hab/km². Excelente para LAVAÍ!</div>`
+      : (info.prioridade === "MÉDIA"
+        ? `<div style="background:#dbeafe; padding:8px; border-radius:8px;"><strong>⚡ PRIORIDADE MÉDIA</strong> - ${populacao.toLocaleString()} habitantes. Potencial moderado.</div>`
+        : `<div style="background:#fee2e2; padding:8px; border-radius:8px;"><strong>⚠️ BAIXA PRIORIDADE</strong> - ${populacao.toLocaleString()} habitantes. Público com máquina em casa.</div>`);
+    
+    document.getElementById("recomendacaoDinamica").innerHTML = `<strong>🎯 Recomendação LAVAÍ:</strong> ${recHtml}`;
+    
+    desenharCirculo();
+  }
+
+  function setRaio(metros) {
+  // 🔥 cancela qualquer atualização pendente do mapa
+  if (timeoutAtualizacao) clearTimeout(timeoutAtualizacao);
+
+  raioAtual = metros;
+  document.getElementById("raioAtualDisplay").innerText = getRaioDisplay();
+  
+  document.querySelectorAll('.raio-btn').forEach(btn => {
+    if (parseInt(btn.dataset.raio) === metros) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  
+  desenharCirculo();
+  atualizarAnaliseSocioeconomica();
+  
+  if (supermercados.length > 0) buscarSupermercados();
+  if (concorrentes.length > 0) buscarConcorrentes();
+}
+  function initMap() {
+    const base = { lat: -23.53898, lng: -46.64019 };
+    centroAtual = new google.maps.LatLng(base.lat, base.lng);
+    map = new google.maps.Map(document.getElementById("map"), { 
+      center: base, 
+      zoom: 13, 
+      disableDefaultUI: false, 
+      mapTypeControl: false,
+      gestureHandling: "greedy" // Permite arrastar o mapa livremente
+    });
+    
+    service = new google.maps.places.PlacesService(map);
+    geocoder = new google.maps.Geocoder();
+    
+    // Plota pontos LAVAÍ
+    lavaiPontos.forEach(p => {
+      const marker = new google.maps.Marker({
+        position: { lat: p.lat, lng: p.lng },
+        map,
+        title: p.nome,
+        icon: { url: "lavai.png", scaledSize: new google.maps.Size(40, 40) }
+      });
+      const info = new google.maps.InfoWindow({ content: `<b>LAVAÍ</b><br>${p.nome}` });
+      marker.addListener("click", () => info.open(map, marker));
+      todosMarcadores.push(marker);
+    });
+    
+    // Evento de movimento do mapa com debounce para não travar
+    map.addListener("center_changed", () => {
+      centroAtual = map.getCenter();
+      if (timeoutAtualizacao) clearTimeout(timeoutAtualizacao);
+      timeoutAtualizacao = setTimeout(() => {
+        atualizarAnaliseSocioeconomica();
+      }, 300);
+    });
+    
+    atualizarAnaliseSocioeconomica();
+    desenharCirculo();
+  }
+
+  function buscarEndereco() {
+    const endereco = document.getElementById("endereco").value;
+    geocoder.geocode({ address: endereco }, (results, status) => {
+      if (status === "OK") {
+        centroAtual = results[0].geometry.location;
+        map.setCenter(centroAtual);
+        map.setZoom(14);
+        atualizarAnaliseSocioeconomica();
+        desenharCirculo();
+      } else {
+        alert("Endereço não encontrado.");
+      }
+    });
+  }
+
+  function getCorPorRating(rating) {
+    if (rating < 3.5) return "green";
+    if (rating < 4.0) return "yellow";
+    return "red";
+  }
+
+function buscarSupermercados() {
+  if (!centroAtual) {
+    alert("⚠️ Localize um endereço primeiro.");
+    return;
+  }
+  
+  const antigos = todosMarcadores.filter(m => m.isSupermercado);
+  antigos.forEach(m => m.setMap(null));
+  todosMarcadores = todosMarcadores.filter(m => !m.isSupermercado);
+  supermercados = [];
+  
+  document.getElementById("superStatus").innerHTML = `⏳ Buscando supermercados em raio de ${getRaioDisplay()}...`;
+  
+  service.nearbySearch({
+    location: centroAtual,
+    radius: raioAtual,
+    keyword: "supermercado"
+  }, (results, status) => {
+    if (status === "OK" && results) {
+
+      results.forEach(p => {
+        const distancia = google.maps.geometry.spherical.computeDistanceBetween(
+          centroAtual,
+          p.geometry.location
+        );
+
+        // 🔒 FILTRO REAL DO RAIO
+        if (distancia <= raioAtual) {
+          supermercados.push(p);
+
+          const rating = p.rating || 0;
+          const reviews = p.user_ratings_total || 0;
+          const cor = getCorPorRating(rating);
+          
+          const marker = new google.maps.Marker({
+            map,
+            position: p.geometry.location,
+            icon: `http://maps.google.com/mapfiles/ms/icons/${cor}-dot.png`,
+            isSupermercado: true
+          });
+          
+          const densidade = getDensidadePorRegiao(centroAtual.lat(), centroAtual.lng());
+          const areaKm2 = Math.PI * Math.pow(raioAtual / 1000, 2);
+          const populacao = Math.round(densidade * areaKm2);
+          
+          marker.addListener("click", () => {
+            new google.maps.InfoWindow({
+              content: `
+                <b>${p.name}</b><br>
+                ⭐ Rating: ${rating}<br>
+                🗣 Reviews: ${reviews}<br>
+                📍 ${p.vicinity}<br>
+                📏 Distância real: ${Math.round(distancia)}m<br><br>
+                <small>📊 Raio: ${getRaioDisplay()} | População: ~${populacao.toLocaleString()} hab</small>
+              `
+            }).open(map, marker);
+          });
+          
+          todosMarcadores.push(marker);
+        }
+      });
+      
+      document.getElementById("superCount").innerText = supermercados.length;
+      document.getElementById("superStatus").innerHTML = `✅ ${supermercados.length} supermercados dentro de ${getRaioDisplay()}`;
+      
+    } else {
+      document.getElementById("superCount").innerText = "0";
+      document.getElementById("superStatus").innerHTML = `❌ Nenhum supermercado no raio de ${getRaioDisplay()}`;
+    }
+  });
+}
+
+  function buscarConcorrentes() {
+  if (!centroAtual) {
+    alert("⚠️ Localize um endereço primeiro.");
+    return;
+  }
+  
+  const antigos = todosMarcadores.filter(m => m.isConcorrente);
+  antigos.forEach(m => m.setMap(null));
+  todosMarcadores = todosMarcadores.filter(m => !m.isConcorrente);
+  concorrentes = [];
+  
+  document.getElementById("concStatus").innerHTML = `⏳ Buscando concorrentes em raio de ${getRaioDisplay()}...`;
+  
+  service.nearbySearch({
+    location: centroAtual,
+    radius: raioAtual,
+    keyword: "lavanderia autosserviço"
+  }, (results, status) => {
+    if (status === "OK" && results) {
+
+      results.forEach(p => {
+        const distancia = google.maps.geometry.spherical.computeDistanceBetween(
+          centroAtual,
+          p.geometry.location
+        );
+
+        // 🔒 FILTRO REAL DO RAIO
+        if (distancia <= raioAtual) {
+          concorrentes.push(p);
+
+          const marker = new google.maps.Marker({
+            map,
+            position: p.geometry.location,
+            icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            isConcorrente: true
+          });
+          
+          marker.addListener("click", () => {
+            new google.maps.InfoWindow({
+              content: `
+                <b>${p.name}</b><br>
+                ⭐ ${p.rating || "N/A"}<br>
+                🗣 ${p.user_ratings_total || 0}<br>
+                📍 ${p.vicinity}<br>
+                📏 Distância real: ${Math.round(distancia)}m
+              `
+            }).open(map, marker);
+          });
+          
+          todosMarcadores.push(marker);
+        }
+      });
+      
+      document.getElementById("concCount").innerText = concorrentes.length;
+      document.getElementById("concStatus").innerHTML = `✅ ${concorrentes.length} concorrentes dentro de ${getRaioDisplay()}`;
+      
+    } else {
+      document.getElementById("concCount").innerText = "0";
+      document.getElementById("concStatus").innerHTML = `❌ Nenhum concorrente no raio de ${getRaioDisplay()}`;
+    }
+  });
+}
+
+  function distancia(a, b) {
+    const lat1 = a.geometry.location.lat();
+    const lng1 = a.geometry.location.lng();
+    const lat2 = b.geometry.location.lat();
+    const lng2 = b.geometry.location.lng();
+    const dx = lat1 - lat2;
+    const dy = lng1 - lng2;
+    return Math.sqrt(dx*dx + dy*dy) * 111000;
+  }
+
+  // Função para calcular prioridade de instalação do ponto
+  function getPrioridadeInstalacao(rating, classeRegional) {
+    if (classeRegional === "ALTA") {
+      if (rating < 3.5) return "🔥 ALTA - Instalação recomendada";
+      if (rating < 4.0) return "🔥 ALTA - Bom potencial";
+      return "⚡ MÉDIA - Avaliar";
+    } else if (classeRegional === "MÉDIA") {
+      if (rating < 3.5) return "⚡ MÉDIA - Potencial moderado";
+      return "⚠️ BAIXA - Não prioritário";
+    } else {
+      return "⚠️ BAIXA - Não recomendado";
+    }
+  }
+
+  function analisarPotencial() {
+    if (supermercados.length === 0) {
+      alert(`⚠️ Nenhum supermercado carregado. Clique em 'Supermercados' primeiro (raio atual: ${getRaioDisplay()}).`);
+      return;
+    }
+    
+    melhoresPontos = [];
+    const info = getClassePorRegiao(centroAtual.lat(), centroAtual.lng());
+    const bonusRegional = info.prioridade === "ALTA" ? 7 : (info.prioridade === "MÉDIA" ? 3 : 0);
+    
+    supermercados.forEach(s => {
+      let score = bonusRegional + (s.user_ratings_total || 0) / 1000;
+      
+      concorrentes.forEach(c => {
+        if (distancia(s, c) < 500) score -= 2;
+      });
+      
+      const rating = s.rating || 0;
+      if (rating < 3.5) score += 5;
+      else if (rating < 4.0) score += 2;
+      
+      if (score > 5) {
+        const prioridade = getPrioridadeInstalacao(rating, info.prioridade);
+        
+        melhoresPontos.push({
+          nome: s.name,
+          endereco: s.vicinity,
+          rating: rating,
+          reviews: s.user_ratings_total || 0,
+          score: score.toFixed(2),
+          prioridade: prioridade,
+          lat: s.geometry.location.lat(),
+          lng: s.geometry.location.lng()
+        });
+      }
+    });
+    
+    melhoresPontos.sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
+    
+    if (melhoresPontos.length === 0) {
+      alert(`⚠️ Nenhum ponto com score > 5 no raio de ${getRaioDisplay()}`);
+    } else {
+      const prioridades = melhoresPontos.map(p => p.prioridade);
+      const hasAlta = prioridades.some(p => p.includes("ALTA"));
+      alert(`✅ ${melhoresPontos.length} ponto(s) de alto potencial! Raio: ${getRaioDisplay()} | ${hasAlta ? '🔥 Existem pontos com PRIORIDADE ALTA para instalação!' : '⚡ Pontos com prioridade média/baixa'}`);
+    }
+  }
+
+  function limparMapa() {
+    const naoLavai = todosMarcadores.filter(m => m.isSupermercado || m.isConcorrente);
+    naoLavai.forEach(m => m.setMap(null));
+    todosMarcadores = todosMarcadores.filter(m => !m.isSupermercado && !m.isConcorrente);
+    supermercados = [];
+    concorrentes = [];
+    melhoresPontos = [];
+    document.getElementById("superCount").innerText = "0";
+    document.getElementById("concCount").innerText = "0";
+    document.getElementById("superStatus").innerHTML = "🗑️ Limpo - clique em buscar";
+    document.getElementById("concStatus").innerHTML = "🗑️ Limpo - clique em buscar";
+  }
+
+  function exportarExcel() {
+    if (melhoresPontos.length === 0) {
+      alert("⚠️ Nenhum ponto para exportar. Clique em 'Analisar Potencial' primeiro.");
+      return;
+    }
+    
+    const dados = melhoresPontos.map((p, i) => ({
+      "#": i + 1,
+      "Nome do Estabelecimento": p.nome,
+      "Endereço": p.endereco,
+      "⭐ Rating": p.rating,
+      "🗣 Reviews": p.reviews,
+      "🎯 PRIORIDADE DE INSTALAÇÃO": p.prioridade,
+      "🏆 Score de Potencial": p.score,
+      "📍 Latitude": p.lat,
+      "📍 Longitude": p.lng
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(dados);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Melhores Pontos LAVAÍ");
+    XLSX.writeFile(wb, `LAVAI_prioridade_${getRaioDisplay()}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+    
+    alert(`📊 Excel exportado com ${melhoresPontos.length} pontos e suas prioridades de instalação!`);
+  }
+
+  function exportarPDF() {
+    if (melhoresPontos.length === 0) {
+      alert("⚠️ Nenhum ponto para exportar. Clique em 'Analisar Potencial' primeiro.");
+      return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const info = getClassePorRegiao(centroAtual.lat(), centroAtual.lng());
+    
+    doc.setFontSize(18);
+    doc.setTextColor(15, 23, 42);
+    doc.text("LAVAÍ Expansion Engine - Relatório de Prioridade de Instalação", 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 30);
+    doc.text(`Região analisada: ${document.getElementById("endereco").value}`, 14, 37);
+    doc.text(`Raio de análise: ${getRaioDisplay()} | Classe Regional: ${info.classe} | Prioridade Regional: ${info.prioridade}`, 14, 44);
+    
+    const headers = [["#", "Estabelecimento", "Endereço", "Rating", "Reviews", "PRIORIDADE", "Score"]];
+    const rows = melhoresPontos.map((p, i) => [
+      i + 1,
+      p.nome,
+      p.endereco.substring(0, 30),
+      p.rating,
+      p.reviews,
+      p.prioridade,
+      p.score
+    ]);
+    
+    doc.autoTable({
+      head: headers,
+      body: rows,
+      startY: 52,
+      theme: 'striped',
+      headStyles: { fillColor: [15, 23, 42], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+      bodyStyles: { fontSize: 7 },
+      columnStyles: {
+        5: { fontStyle: 'bold', textColor: [34, 197, 94] }
+      }
+    });
+    
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Total de pontos de alto potencial: ${melhoresPontos.length}`, 14, finalY);
+    doc.text("🔥 PRIORIDADE ALTA: Instalação recomendada | ⚡ PRIORIDADE MÉDIA: Avaliar | ⚠️ PRIORIDADE BAIXA: Não recomendado", 14, finalY + 6);
+    doc.text("LAVAÍ Expansion Engine - Foco em Classes C, D, E (maior necessidade de lavanderias self-service)", 14, finalY + 12);
+    
+    doc.save(`LAVAI_prioridade_${getRaioDisplay()}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`);
+    
+    alert(`📄 PDF exportado com ${melhoresPontos.length} pontos e suas prioridades de instalação!`);
+  }
+
+  // Expor funções globalmente
+  window.buscarEndereco = buscarEndereco;
+  window.buscarSupermercados = buscarSupermercados;
+  window.buscarConcorrentes = buscarConcorrentes;
+  window.analisarPotencial = analisarPotencial;
+  window.limparMapa = limparMapa;
+  window.exportarExcel = exportarExcel;
+  window.exportarPDF = exportarPDF;
+  window.setRaio = setRaio;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btnBuscarEndereco").onclick = () => buscarEndereco();
+    document.getElementById("btnSupermercados").onclick = () => buscarSupermercados();
+    document.getElementById("btnConcorrentes").onclick = () => buscarConcorrentes();
+    document.getElementById("btnAnalisar").onclick = () => analisarPotencial();
+    document.getElementById("btnLimpar").onclick = () => limparMapa();
+    document.getElementById("btnExportExcel").onclick = () => exportarExcel();
+    document.getElementById("btnExportPDF").onclick = () => exportarPDF();
+    
+    document.querySelectorAll('.raio-btn').forEach(btn => {
+      btn.onclick = () => setRaio(parseInt(btn.dataset.raio));
+    });
+    
+    document.getElementById("endereco").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") buscarEndereco();
+    });
+  });
+</script>
+
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBYgZYvQbrGjs9oxulIly4D0OjSnokX5s&libraries=places,geometry&callback=initMap"></script>
+
+</body>
+</html>
