@@ -446,17 +446,24 @@
       scrollbar-width: none;
     }
     .radius-chips::-webkit-scrollbar { display: none; }
-    .chip {
-      padding: 10px 18px; border-radius: 50px; background: rgba(255,255,255,0.05);
-      color: white; border: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem;
-      font-weight: 700; white-space: nowrap;
-    }
     .chip.active { background: var(--accent); border-color: var(--accent); }
+
+    .mobile-action-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;
+    }
+    .action-card {
+      background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px;
+      padding: 20px; display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .action-icon { font-size: 1.8rem; }
+    .action-name { color: white; font-weight: 800; font-size: 0.9rem; }
+    .action-desc { color: #94a3b8; font-size: 0.7rem; }
 
     @media (max-width: 768px) {
       .mobile-top-bar, .bottom-nav { display: flex; }
       .search-overlay, .main-sidebar, .sidebar-overlay, .mini-nav { display: none !important; }
-      #map { height: calc(100% - 145px); margin-top: 70px; }
+      #map { height: calc(100% - 150px); margin-top: 75px; }
       
       .analysis-toast { 
         display: none; bottom: 85px !important; width: calc(100% - 30px) !important;
@@ -527,7 +534,33 @@
     <div class="chip" onclick="setRaioMobile(2000, this)">2km</div>
     <div class="chip" onclick="setRaioMobile(3000, this)">3km</div>
   </div>
-  <div id="mobile-metrics-container"></div>
+  
+  <div class="mobile-action-grid">
+    <div class="action-card" onclick="triggerMobileAnalysis('mercados')">
+      <div class="action-icon">🛒</div>
+      <div class="action-name">Mercados</div>
+      <div class="action-desc">Mapear âncoras</div>
+    </div>
+    <div class="action-card" onclick="triggerMobileAnalysis('concorrentes')">
+      <div class="action-icon">🧺</div>
+      <div class="action-name">Concorrência</div>
+      <div class="action-desc">Análise direta</div>
+    </div>
+    <div class="action-card" onclick="triggerMobileAnalysis('pombais')">
+      <div class="action-icon">🏢</div>
+      <div class="action-name">Moradias</div>
+      <div class="action-desc">Densidade vertical</div>
+    </div>
+    <div class="action-card" onclick="triggerMobileAnalysis('adensamento')">
+      <div class="action-icon">🏙️</div>
+      <div class="action-name">Veredito IA</div>
+      <div class="action-desc">Score Final</div>
+    </div>
+  </div>
+
+  <div id="btnDecisaoMobile" style="margin-top: 20px;">
+    <button onclick="gerarVeredito()" class="btn-action primary" style="width:100%; height: 55px; border-radius: 12px; font-weight: 800; box-shadow: 0 4px 20px var(--accent-glow);">🚀 GERAR VEREDITO ESTRATÉGICO</button>
+  </div>
 </div>
 
 <div class="dashboard-layout">
@@ -649,6 +682,14 @@
   let map, service, geocoder, centroAtual, raioAtual = 500, todosMarcadores = [], circleRaio;
   let supermercados = [], concorrentes = [], adensDataGlobal = null, analiseGlobal = null;
   
+  function triggerMobileAnalysis(type) {
+    switchTab('mapa', document.querySelector('.nav-item:first-child'));
+    if (type === 'mercados') buscarSupermercados();
+    else if (type === 'concorrentes') buscarConcorrentes();
+    else if (type === 'pombais') buscarPombais();
+    else if (type === 'adensamento') analisarMercado();
+  }
+
   function switchTab(tab, el) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
@@ -656,24 +697,6 @@
     document.querySelectorAll('.mobile-panel').forEach(p => p.classList.remove('active'));
     if (tab === 'analise') {
       document.getElementById('tab-analise').classList.add('active');
-      // Clonar metrics card para o painel mobile se vazio
-      const mobileContainer = document.getElementById('mobile-metrics-container');
-      const originalScroll = document.querySelector('.sidebar-scroll');
-      if (mobileContainer.children.length === 0) {
-        mobileContainer.appendChild(originalScroll.cloneNode(true));
-        // Re-vincular eventos após clonagem
-        mobileContainer.querySelectorAll('button').forEach(btn => {
-          const onclick = btn.getAttribute('onclick');
-          if (onclick) {
-            btn.onclick = () => {
-              eval(onclick);
-              switchTab('mapa', document.querySelector('.nav-item:first-child'));
-            };
-          }
-        });
-      }
-    } else if (tab === 'steps') {
-      document.getElementById('tab-steps').classList.add('active');
     }
   }
 
