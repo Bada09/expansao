@@ -1236,11 +1236,8 @@
       passosStatus.adensamento = true;
       adicionarEvolutionCard("STEP 4", "Adensamento Urbano", Math.round(data.perc) + "% Concentração");
 
-      // Resumo Consolidado no Toast
-      const resumoFinal = `Análise de Área Concluída!\n\n• Mercado: ${supermercados.length} pontos detectados.\n• Concorrência: ${(concorrentes||[]).length} unidades próximas.\n• Adensamento: ${Math.round(data.perc)}% de concentração.\n\nAguarde, os dados serão publicados em breve...`;
+      const resumoFinal = `Análise de Área Concluída!\n\n• Mercado: ${supermercados.length} pontos detectados.\n• Concorrência: ${(concorrentes||[]).length} unidades próximas.\n• Adensamento: ${Math.round(data.perc)}% de concentração.`;
       
-      clearTimeout(typewriterTimeout);
-      clearTimeout(autoCloseTimeout);
       typeWriter(toastBody, resumoFinal);
 
     } catch (e) {
