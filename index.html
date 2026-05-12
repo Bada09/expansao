@@ -406,41 +406,31 @@
 
     @media (max-width: 768px) {
       .mini-nav { display: none; }
+      .evolution-cards { display: none; }
       .main-sidebar { 
         position: fixed; 
-        left: 0; 
+        left: 5%; 
         bottom: -100%;
         top: auto;
-        height: 75vh;
-        width: 100%;
-        max-width: 100%;
+        height: auto;
+        max-height: 70vh;
+        width: 90%;
+        max-width: 400px;
         z-index: 1000;
-        border-radius: 24px 24px 0 0;
+        border-radius: 24px;
         transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        padding-top: 5px;
+        padding: 10px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.6);
       }
-      .main-sidebar.active { bottom: 0; }
-      .main-sidebar.peek { bottom: -65vh; } /* Only shows the header/metrics */
+      .main-sidebar.active { bottom: 20px; }
+      .main-sidebar.peek { bottom: -60vh; } 
       
-      .drag-handle { display: block; }
-      
-      .search-overlay { 
-        top: 20px; left: 10px; width: calc(100% - 20px); max-width: 100%; 
-        border-radius: 16px; padding: 12px;
-        background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      }
-      .btn-search { height: 45px; border-radius: 10px; }
-      
-      .evolution-cards { 
-        display: flex; 
-        right: auto; 
-        left: 50%; 
-        transform: translateX(-50%); 
-        top: 100px; 
-        width: 150px; 
-        zoom: 0.75; 
-      }
+      .metric-card { padding: 10px; margin-bottom: 8px; }
+      .metric-card h3 { font-size: 0.7rem; }
+      .metric-value { font-size: 1.1rem; }
+      .metric-label { font-size: 0.6rem; }
+      .progress-bar { height: 4px; }
+      .btn-action { height: 35px; font-size: 0.7rem; }
       .modal-content { width: 95%; max-height: 85vh; border-radius: 24px; }
       #reportContainer { padding: 30px 20px !important; }
       
