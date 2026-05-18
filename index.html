@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LAVAÍ | Expansion Intelligence Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --bg-main: rgba(128, 128, 128, 0.3);
@@ -23,28 +28,112 @@
       --nav-width: 70px;
     }
 
-    * { box-sizing: border-box; }
-    body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Outfit', 'Inter', sans-serif; overflow: hidden; background: var(--bg-main); color: var(--text-main); }
+    * {
+      box-sizing: border-box;
+    }
 
-    .dashboard-layout { position: relative; height: 100vh; width: 100vw; overflow: hidden; }
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Outfit', 'Inter', sans-serif;
+      overflow: hidden;
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    .dashboard-layout {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
 
     /* MINI NAV SIDEBAR */
-    .mini-nav { position: relative; width: var(--nav-width); background: var(--bg-sidebar); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 24px; border-right: 1px solid rgba(255,255,255,0.1); z-index: 100; height: 100%; float: left; }
-    .nav-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-dim); cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
-    .nav-icon:hover, .nav-icon.active { background: rgba(255,255,255,0.05); color: var(--text-main); border-color: rgba(255,255,255,0.1); }
-    .nav-icon.active { background: var(--accent); color: white; box-shadow: 0 0 15px var(--accent-glow); }
+    .mini-nav {
+      position: relative;
+      width: var(--nav-width);
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 24px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      height: 100%;
+      float: left;
+    }
+
+    .nav-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .nav-icon:hover,
+    .nav-icon.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-icon.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
 
     /* RESULTS SIDEBAR */
-    .main-sidebar { position: relative; width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.1); z-index: 90; box-shadow: 20px 0 50px rgba(0,0,0,0.3); height: 100%; float: left; }
-    .sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .sidebar-header h2 { font-size: 0.9rem; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
-    .sidebar-scroll { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: thin; padding-bottom: 80px; }
-    
+    .main-sidebar {
+      position: relative;
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 90;
+      box-shadow: 20px 0 50px rgba(0, 0, 0, 0.3);
+      height: 100%;
+      float: left;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-header h2 {
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      scrollbar-width: thin;
+      padding-bottom: 80px;
+    }
+
     /* FIXED SIDEBAR FOOTER */
     .sidebar-footer {
       padding: 16px;
       background: #1e293b;
-      border-top: 1px solid rgba(255,255,255,0.05);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       gap: 10px;
       position: absolute;
@@ -52,6 +141,7 @@
       width: 100%;
       z-index: 10;
     }
+
     .btn-footer {
       flex: 1;
       padding: 14px 10px;
@@ -65,28 +155,32 @@
       align-items: center;
       justify-content: center;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       background: transparent;
       color: #fff;
     }
-    .btn-footer.pdf { 
-      border-color: #ef4444; 
-      color: #ef4444; 
+
+    .btn-footer.pdf {
+      border-color: #ef4444;
+      color: #ef4444;
     }
-    .btn-footer.pdf:hover { 
-      background: #ef4444; 
-      color: white; 
-      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); 
+
+    .btn-footer.pdf:hover {
+      background: #ef4444;
+      color: white;
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
       transform: translateY(-2px);
     }
-    .btn-footer.excel { 
-      border-color: #22c55e; 
-      color: #22c55e; 
+
+    .btn-footer.excel {
+      border-color: #22c55e;
+      color: #22c55e;
     }
-    .btn-footer.excel:hover { 
-      background: #22c55e; 
-      color: white; 
-      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4); 
+
+    .btn-footer.excel:hover {
+      background: #22c55e;
+      color: white;
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
       transform: translateY(-2px);
     }
 
@@ -94,76 +188,288 @@
     .metric-card {
       background: rgba(0, 0, 0, 0.3);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 15px;
       margin-bottom: 12px;
       color: #fff;
     }
-    .card-label { font-size: 0.65rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; opacity: 0.8; }
-    .metric-group { display: flex; justify-content: space-between; align-items: baseline; }
-    .metric-value { font-size: 1.4rem; font-weight: 800; color: white; }
-    .progress-track { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-top: 10px; overflow: hidden; }
-    .progress-fill { height: 100%; transition: width 0.6s ease; }
 
-    .btn-action { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; color: white; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-    .btn-action:hover { background: rgba(255,255,255,0.1); }
-    .btn-action.primary { background: var(--accent); border: none; }
+    .card-label {
+      font-size: 0.65rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+
+    .metric-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .metric-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: white;
+    }
+
+    .progress-track {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      transition: width 0.6s ease;
+    }
+
+    .btn-action {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-action.primary {
+      background: var(--accent);
+      border: none;
+    }
 
     /* MAP CONTAINER */
-    .map-viewport { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: #000; }
-    #map { height: 100%; width: 100%; }
+    .map-viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      background: #000;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
 
     /* SEARCH OVERLAY */
-    .search-overlay { position: fixed; top: 20px; left: 410px; right: 20px; max-width: 580px; z-index: 999; display: flex; gap: 8px; }
-    .input-group { flex: 1; background: white; border-radius: 8px; padding: 0 12px; display: flex; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-    .input-group input { background: transparent; border: none; color: #000; padding: 14px 8px; width: 100%; outline: none; font-size: 1rem; font-family: 'Inter', sans-serif; }
-    .btn-search { background: var(--accent); border: none; color: white; padding: 0 18px; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px var(--accent-glow); }
-    
-    .radius-selector { display: flex; gap: 2px; background: #f1f5f9; padding: 4px; border-radius: 8px; }
-    .radius-btn { padding: 6px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; color: #64748b; cursor: pointer; }
-    .radius-btn.active { background: white; color: var(--accent); }
+    .search-overlay {
+      position: fixed;
+      top: 20px;
+      left: 410px;
+      right: 20px;
+      max-width: 580px;
+      z-index: 999;
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-group {
+      flex: 1;
+      background: white;
+      border-radius: 8px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-group input {
+      background: transparent;
+      border: none;
+      color: #000;
+      padding: 14px 8px;
+      width: 100%;
+      outline: none;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-search {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 0 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .radius-selector {
+      display: flex;
+      gap: 2px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .radius-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .radius-btn.active {
+      background: white;
+      color: var(--accent);
+    }
 
     /* MAP LABELS */
-    .map-card-label { background: white; padding: 3px 6px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); border: 1px solid #e2e8f0; white-space: nowrap; text-align: center; }
+    .map-card-label {
+      background: white;
+      padding: 3px 6px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border: 1px solid #e2e8f0;
+      white-space: nowrap;
+      text-align: center;
+    }
 
-    .slider-container { margin: 15px 0; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-    .radius-slider { width: 100%; -webkit-appearance: none; height: 4px; background: #334155; border-radius: 2px; outline: none; margin: 10px 0; }
-    .radius-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 10px var(--accent-glow); }
-    
-    .clickable-card { cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
-    .clickable-card:hover { transform: translateY(-2px); border-color: var(--accent); background: #1C212C; }
+    .slider-container {
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-    .loading-pulse { }
-    
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-    .shimmer-text { color: #fff; }
-    
+    .radius-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      outline: none;
+      margin: 10px 0;
+    }
+
+    .radius-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .clickable-card {
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .clickable-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: #1C212C;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .loading-pulse {}
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .shimmer-text {
+      color: #fff;
+    }
+
     .progress-fill {
       height: 100%;
       transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       background: var(--accent) !important;
     }
-    
+
     @keyframes glowing-shimmer {
-      0% { box-shadow: 0 0 10px var(--accent-glow); border-color: rgba(59, 130, 246, 0.3); }
-      50% { box-shadow: 0 0 30px var(--accent-glow), 0 0 60px rgba(59, 130, 246, 0.2); border-color: var(--accent); }
-      100% { box-shadow: 0 0 10px var(--accent-glow); border-color: rgba(59, 130, 246, 0.3); }
+      0% {
+        box-shadow: 0 0 10px var(--accent-glow);
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 30px var(--accent-glow), 0 0 60px rgba(59, 130, 246, 0.2);
+        border-color: var(--accent);
+      }
+
+      100% {
+        box-shadow: 0 0 10px var(--accent-glow);
+        border-color: rgba(59, 130, 246, 0.3);
+      }
     }
+
     .cintilante {
       border: 2px solid var(--accent) !important;
       box-shadow: 0 0 15px var(--accent-glow) !important;
     }
 
     @keyframes ai-glow {
-      0% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); }
-      100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.4); }
+      0% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.4);
+      }
+
+      100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.4);
+      }
     }
+
     @keyframes ai-shimmer-sweep {
-      from { transform: translateX(-100%) skewX(-20deg); }
-      to { transform: translateX(200%) skewX(-20deg); }
+      from {
+        transform: translateX(-100%) skewX(-20deg);
+      }
+
+      to {
+        transform: translateX(200%) skewX(-20deg);
+      }
     }
+
     .ai-processing {
       position: relative;
       overflow: hidden;
@@ -171,20 +477,29 @@
       background: rgba(15, 23, 42, 0.95) !important;
       backdrop-filter: blur(16px) !important;
     }
+
     .ai-processing::before {
       display: none;
     }
-    .ai-processing * { position: relative; z-index: 2; }
+
+    .ai-processing * {
+      position: relative;
+      z-index: 2;
+    }
 
     /* MASK OVERLAY */
     .map-mask {
       position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
       pointer-events: none;
       z-index: 2;
       transition: backdrop-filter 0.5s ease;
     }
+
     .map-analyzing {
       backdrop-filter: blur(12px);
       background: rgba(0, 0, 0, 0.2);
@@ -194,9 +509,77 @@
     }
 
     /* STATUS TOAST / FEED - ULTRA-WIDE SCALE */
+    .evolution-cards {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .evolution-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-left: 4px solid var(--accent);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: 280px;
+      color: white;
+      animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+
+    .evolution-card .ev-step {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .evolution-card .ev-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .evolution-card .ev-value {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .evolution-card .ev-print {
+      width: 100%;
+      height: 80px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      margin-top: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
     .analysis-toast {
       position: fixed;
-      bottom: 40px; 
+      bottom: 40px;
       left: 50%;
       transform: translateX(-50%);
       width: 600px;
@@ -208,7 +591,7 @@
       border: 1px solid rgba(59, 130, 246, 0.4);
       padding: 30px;
       border-radius: 32px;
-      box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
       z-index: 10000;
       display: none;
       flex-direction: column;
@@ -218,13 +601,36 @@
       overflow: hidden;
       color: #fff;
     }
-    @keyframes slideUpCenter { from { transform: translate(-50%, 100px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-    .toast-header { font-size: 0.85rem; color: #fff; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; letter-spacing: 2px; }
-    .toast-body { 
-      font-size: 1.2rem; 
-      color: #fff; 
-      line-height: 1.5; 
-      font-family: 'Outfit', sans-serif; 
+
+    @keyframes slideUpCenter {
+      from {
+        transform: translate(-50%, 100px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    .toast-header {
+      font-size: 0.85rem;
+      color: #fff;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      letter-spacing: 2px;
+    }
+
+    .toast-body {
+      font-size: 1.2rem;
+      color: #fff;
+      line-height: 1.5;
+      font-family: 'Outfit', sans-serif;
       white-space: pre-wrap;
       word-wrap: break-word;
       position: relative;
@@ -234,16 +640,29 @@
       padding: 5px 0;
       display: block;
     }
-    .cursor { 
-      display: inline-block; 
-      width: 4px; 
-      height: 1.2em; 
-      background: var(--accent); 
-      margin-left: 6px; 
-      vertical-align: middle; 
+
+    .cursor {
+      display: inline-block;
+      width: 4px;
+      height: 1.2em;
+      background: var(--accent);
+      margin-left: 6px;
+      vertical-align: middle;
       box-shadow: 0 0 10px var(--accent);
     }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
     .map-pip {
       width: 100%;
       height: 180px;
@@ -253,13 +672,15 @@
       background-size: cover;
       background-position: center;
       position: relative;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
       display: none;
       animation: slideUp 0.8s ease forwards;
     }
+
     .pip-label {
       position: absolute;
-      top: 15px; left: 15px;
+      top: 15px;
+      left: 15px;
       background: var(--accent);
       padding: 4px 10px;
       border-radius: 6px;
@@ -268,15 +689,18 @@
       font-weight: 900;
       letter-spacing: 1.5px;
       z-index: 5;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
+
     .pip-kpis {
       position: absolute;
-      bottom: 15px; right: 15px;
+      bottom: 15px;
+      right: 15px;
       display: flex;
       gap: 6px;
       z-index: 5;
     }
+
     .pip-kpi {
       background: rgba(15, 23, 42, 0.95);
       backdrop-filter: blur(8px);
@@ -289,14 +713,34 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-    .toast-progress-container { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 20px; overflow: hidden; display: none; }
-    .toast-progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.5s ease; box-shadow: 0 0 15px var(--accent); }
+
+    .toast-progress-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin-top: 20px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .toast-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.5s ease;
+      box-shadow: 0 0 15px var(--accent);
+    }
+
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(10px);
       display: none;
       justify-content: center;
@@ -304,12 +748,13 @@
       z-index: 20000;
       padding: 20px;
     }
+
     .modal-content {
       background: var(--bg-card);
       width: 100%;
       max-width: 1100px;
       border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       position: relative;
       max-height: 90vh;
       overflow-y: auto;
@@ -333,8 +778,11 @@
       pointer-events: auto;
       padding-bottom: 20px;
     }
-    .evolution-cards::-webkit-scrollbar { display: none; }
-    
+
+    .evolution-cards::-webkit-scrollbar {
+      display: none;
+    }
+
     .evolution-card {
       background: #1e293b;
       border-radius: 16px;
@@ -346,14 +794,48 @@
       flex-shrink: 0;
       color: #fff;
     }
+
     @keyframes slideInRight {
-      from { transform: translateX(50px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from {
+        transform: translateX(50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
-    .ev-step { font-size: 0.55rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1.2px; opacity: 0.8; }
-    .ev-title { font-size: 0.75rem; font-weight: 700; color: #fff; margin-bottom: 0px; }
-    .metric-value { font-size: 1.6rem; font-weight: 800; color: #fff; margin-right: 8px; }
-    .ev-value { font-size: 1.1rem; font-weight: 800; color: #fff; }
+
+    .ev-step {
+      font-size: 0.55rem;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      opacity: 0.8;
+    }
+
+    .ev-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0px;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      margin-right: 8px;
+    }
+
+    .ev-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
     .ev-print {
       width: 100%;
       height: 75px;
@@ -361,1163 +843,1945 @@
       background-size: cover;
       background-position: center;
       margin-top: 6px;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
+
     @keyframes modalSlide {
-      from { opacity: 0; transform: translateY(30px) scale(0.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
+
     .close-modal {
-      position: absolute; top: 20px; right: 20px;
-      width: 36px; height: 36px; border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--text-dim); transition: 0.2s;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-dim);
+      transition: 0.2s;
       z-index: 10;
     }
-    .close-modal:hover { background: var(--danger); color: white; }
-    .modal-body { padding: 40px; }
+
+    .close-modal:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .modal-body {
+      padding: 40px;
+    }
+
     .score-circle {
-      width: 120px; height: 120px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       border: 8px solid var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.5rem; font-weight: 800; margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0 auto 20px;
     }
 
     /* UBER-STYLE MOBILE INTERACTION */
-    .mobile-toggle { display: none; } /* Replaced by bottom sheet interaction */
-
-    .sidebar-overlay { 
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 999; 
+    .mobile-toggle {
+      display: none;
     }
-    .sidebar-overlay.active { display: block; }
+
+    /* Replaced by bottom sheet interaction */
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      z-index: 999;
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+    }
 
     .drag-handle {
-      display: none; width: 40px; height: 5px; background: rgba(255,255,255,0.2);
-      border-radius: 10px; margin: 10px auto 15px;
+      display: none;
+      width: 40px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      margin: 10px auto 15px;
     }
 
     @media (max-width: 1024px) {
-      .search-overlay { left: 20px; max-width: calc(100% - 40px); }
+      .search-overlay {
+        left: 20px;
+        max-width: calc(100% - 40px);
+      }
     }
 
     /* MOBILE APP ARCHITECTURE */
     .mobile-top-bar {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 75px;
-      background: #1e293b; z-index: 2000; align-items: center; padding: 0 15px;
-      gap: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border-bottom: 1px solid var(--accent);
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 75px;
+      background: #1e293b;
+      z-index: 2000;
+      align-items: center;
+      padding: 0 15px;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid var(--accent);
     }
-    .mobile-logo { font-weight: 900; color: var(--accent); font-size: 1.2rem; letter-spacing: 1px; min-width: 70px; }
-    .mobile-search-wrapper { flex: 1; position: relative; }
+
+    .mobile-logo {
+      font-weight: 900;
+      color: var(--accent);
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      min-width: 70px;
+    }
+
+    .mobile-search-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
     .mobile-search-box {
-      width: 100%; height: 48px; background: rgba(255,255,255,0.08); border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1); padding: 0 15px 0 40px; color: white; font-size: 0.95rem;
+      width: 100%;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 15px 0 40px;
+      color: white;
+      font-size: 0.95rem;
     }
-    .search-icon-inside { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--accent); opacity: 0.8; }
+
+    .search-icon-inside {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
     .btn-ir {
-      background: var(--accent); color: white; border: none; height: 48px; padding: 0 18px;
-      border-radius: 12px; font-weight: 800; font-size: 0.85rem; box-shadow: 0 4px 15px var(--accent-glow);
+      background: var(--accent);
+      color: white;
+      border: none;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 15px var(--accent-glow);
       flex-shrink: 0;
     }
 
     .bottom-nav {
-      display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 75px;
-      background: #1e293b; z-index: 1005; border-top: 1px solid rgba(255,255,255,0.05);
-      justify-content: space-around; align-items: center; padding-bottom: 15px;
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 75px;
+      background: #1e293b;
+      z-index: 1005;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: 15px;
     }
+
     .nav-item {
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      color: #94a3b8; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #94a3b8;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
-    .nav-item.active { color: var(--accent); }
-    .nav-item svg { width: 22px; height: 22px; }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+    }
 
     .mobile-panel {
-      display: none; position: fixed; top: 70px; left: 0; width: 100%; height: calc(100% - 145px);
-      background: #0f172a; z-index: 1004; overflow-y: auto; padding: 20px;
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 145px);
+      background: #0f172a;
+      z-index: 1004;
+      overflow-y: auto;
+      padding: 20px;
     }
-    .mobile-panel.active { display: block; }
+
+    .mobile-panel.active {
+      display: block;
+    }
 
     .radius-chips {
-      display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 5px;
       scrollbar-width: none;
     }
-    .radius-chips::-webkit-scrollbar { display: none; }
-    .chip.active { background: var(--accent); border-color: var(--accent); }
+
+    .radius-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
 
     .mobile-action-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 10px;
     }
+
     .action-card {
-      background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px;
-      padding: 20px; display: flex; flex-direction: column; align-items: center;
-      text-align: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
-    .action-icon { font-size: 1.8rem; }
-    .action-name { color: white; font-weight: 800; font-size: 0.9rem; }
-    .action-desc { color: #94a3b8; font-size: 0.7rem; }
+
+    .action-icon {
+      font-size: 1.8rem;
+    }
+
+    .action-name {
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .action-desc {
+      color: #94a3b8;
+      font-size: 0.7rem;
+    }
 
     @media (max-width: 768px) {
-      .mobile-top-bar, .bottom-nav { display: flex; }
-      .search-overlay, .main-sidebar, .sidebar-overlay, .mini-nav { display: none !important; }
-      #map { height: calc(100% - 150px); margin-top: 75px; }
-      
-      .analysis-toast { 
-        display: none; bottom: 85px !important; width: calc(100% - 30px) !important;
-        left: 15px !important; z-index: 1006; transform: none !important;
-        padding: 12px !important; font-size: 0.75rem !important;
+
+      .mobile-top-bar,
+      .bottom-nav {
+        display: flex;
       }
-      .evolution-cards { 
-        top: 75px; left: 50%; right: auto; transform: translateX(-50%);
-        width: 130px; zoom: 0.65; z-index: 1002;
+
+      .search-overlay,
+      .main-sidebar,
+      .sidebar-overlay,
+      .mini-nav {
+        display: none !important;
       }
-      
+
+      #map {
+        height: calc(100% - 150px);
+        margin-top: 75px;
+      }
+
+      .analysis-toast {
+        display: none;
+        bottom: 85px !important;
+        width: calc(100% - 30px) !important;
+        left: 15px !important;
+        z-index: 1006;
+        transform: none !important;
+        padding: 12px !important;
+        font-size: 0.75rem !important;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .evolution-cards {
+        top: 82px;
+        right: 10px;
+        left: auto;
+        transform: none;
+        width: 110px;
+        zoom: 0.75;
+        z-index: 1002;
+        max-height: calc(100vh - 170px);
+        overflow-y: auto;
+        scrollbar-width: none;
+        display: none !important;
+      }
+
+      .evolution-cards::-webkit-scrollbar {
+        display: none;
+      }
+
       /* Veredito Bottom Sheet */
-      #vereditoModal > div {
-        width: 100% !important; max-width: 100% !important; margin: 0 !important;
-        border-radius: 24px 24px 0 0 !important; position: fixed; bottom: 0; left: 0;
+      #vereditoModal>div {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 24px 24px 0 0 !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
         animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        max-height: 90vh; overflow-y: auto;
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 25px 18px 100px !important;
       }
-      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+      #reportContainer {
+        padding: 20px !important;
+        border-radius: 16px !important;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(100%);
+        }
+
+        to {
+          transform: translateY(0);
+        }
+      }
     }
-    
+
     @media (max-width: 480px) {
-      .mobile-logo { display: none; }
-    }
-  </style>
-    
-    @media (max-width: 480px) {
-      .sidebar-header h2 { font-size: 0.8rem; }
-      .metric-value { font-size: 1.2rem; }
-      .btn-footer { font-size: 0.65rem; padding: 12px 5px; }
+      .mobile-logo {
+        display: none;
+      }
+
+      .sidebar-header h2 {
+        font-size: 0.8rem;
+      }
+
+      .metric-value {
+        font-size: 1.2rem;
+      }
+
+      .btn-footer {
+        font-size: 0.65rem;
+        padding: 12px 5px;
+      }
+
+      #reportContainer>div[style*="grid-template-columns: 1fr 1fr 1fr 1fr"] {
+        grid-template-columns: 1fr 1fr !important;
+      }
+
+      #reportContainer>div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      .analysis-toast {
+        font-size: 0.7rem !important;
+        padding: 10px !important;
+      }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
+
 <body>
 
-<header class="mobile-top-bar">
-  <div class="mobile-logo">LAVAÍ</div>
-  <div class="mobile-search-wrapper">
-    <div class="search-icon-inside">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+  <header class="mobile-top-bar">
+    <div class="mobile-logo">LAVAÍ</div>
+    <div class="mobile-search-wrapper">
+      <div class="search-icon-inside">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+      <input type="text" id="enderecoMobile" class="mobile-search-box" placeholder="Aonde vamos expandir?">
     </div>
-    <input type="text" id="enderecoMobile" class="mobile-search-box" placeholder="Aonde vamos expandir?">
-  </div>
-  <button class="btn-ir" onclick="pesquisarEnderecoMobile()">IR</button>
-</header>
+    <button class="btn-ir" onclick="pesquisarEnderecoMobile()">IR</button>
+  </header>
 
-<nav class="bottom-nav">
-  <div class="nav-item active" onclick="switchTab('mapa', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"></path></svg>
-    MAPA
-  </div>
-  <div class="nav-item" onclick="switchTab('analise', this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-    ANÁLISE
-  </div>
-  <div class="nav-item" onclick="limparMapaCompleto()" style="color: var(--danger);">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-    LIMPAR
-  </div>
-</nav>
-
-<div id="tab-analise" class="mobile-panel">
-  <div class="radius-chips">
-    <div class="chip active" onclick="setRaioMobile(500, this)">500m</div>
-    <div class="chip" onclick="setRaioMobile(1000, this)">1km</div>
-    <div class="chip" onclick="setRaioMobile(2000, this)">2km</div>
-    <div class="chip" onclick="setRaioMobile(3000, this)">3km</div>
-  </div>
-  
-  <div class="mobile-action-grid">
-    <div class="action-card" onclick="triggerMobileAnalysis('mercados')">
-      <div class="action-icon">🛒</div>
-      <div class="action-name">Mercados</div>
-      <div class="action-desc">Mapear âncoras</div>
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('mapa', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"></path>
+      </svg>
+      MAPA
     </div>
-    <div class="action-card" onclick="triggerMobileAnalysis('concorrentes')">
-      <div class="action-icon">🧺</div>
-      <div class="action-name">Concorrência</div>
-      <div class="action-desc">Análise direta</div>
+    <div class="nav-item" onclick="switchTab('analise', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+      </svg>
+      ANÁLISE
     </div>
-    <div class="action-card" onclick="triggerMobileAnalysis('pombais')">
-      <div class="action-icon">🏢</div>
-      <div class="action-name">Moradias</div>
-      <div class="action-desc">Densidade vertical</div>
+    <div class="nav-item" onclick="limparMapaCompleto()" style="color: var(--danger);">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      LIMPAR
     </div>
-    <div class="action-card" onclick="triggerMobileAnalysis('adensamento')">
-      <div class="action-icon">🏙️</div>
-      <div class="action-name">Veredito IA</div>
-      <div class="action-desc">Score Final</div>
-    </div>
-  </div>
-
-  <div id="btnDecisaoMobile" style="margin-top: 20px;">
-    <button onclick="gerarVeredito()" class="btn-action primary" style="width:100%; height: 55px; border-radius: 12px; font-weight: 800; box-shadow: 0 4px 20px var(--accent-glow);">🚀 GERAR VEREDITO ESTRATÉGICO</button>
-  </div>
-</div>
-
-<div class="dashboard-layout">
-  <nav class="mini-nav">
-    <div class="nav-icon active" onclick="homeMap()" title="Home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
-    <div class="nav-icon" onclick="document.getElementById('endereco').focus()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
-    <div class="nav-icon" onclick="exportarRelatorioCompleto()" style="margin-top: auto; color: var(--success);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
-    <div class="nav-icon" onclick="limparMapaCompleto()" style="color: var(--danger);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
   </nav>
 
-  <aside class="main-sidebar peek" style="position: relative;" onclick="expandSidebar()">
-    <div class="drag-handle"></div>
-    <div class="sidebar-header"><h2>Expansão Inteligente</h2></div>
-    <div class="sidebar-scroll">
-      
-      <div class="slider-container">
-        <span class="card-label">Raio de Análise: <span id="raioDisplay" style="color: var(--accent);">500m</span></span>
-        <input type="range" min="100" max="3000" value="500" class="radius-slider" id="radiusRange">
-      </div>
+  <div id="tab-analise" class="mobile-panel">
+    <div class="radius-chips">
+      <div class="chip active" onclick="setRaioMobile(500, this)">500m</div>
+      <div class="chip" onclick="setRaioMobile(1000, this)">1km</div>
+      <div class="chip" onclick="setRaioMobile(2000, this)">2km</div>
+      <div class="chip" onclick="setRaioMobile(3000, this)">3km</div>
+    </div>
 
-      <div id="cardSuper" class="metric-card clickable-card" onclick="buscarSupermercados()">
-        <span class="card-label">Potencial de Mercado (🛒)</span>
-        <div class="metric-group"><span class="metric-value" id="superCount">0</span><span style="font-size: 0.7rem; color: var(--text-dim);">Mercados</span></div>
-        <div class="progress-track"><div id="superProgress" class="progress-fill" style="width: 0%;"></div></div>
-      </div>
- 
-      <div id="cardConc" class="metric-card clickable-card" onclick="buscarConcorrentes()">
-        <span class="card-label">Índice Concorrência (🏁)</span>
-        <div class="metric-group"><span class="metric-value" id="concCount">0</span><span style="font-size: 0.7rem; color: var(--text-dim);">Lavanderias</span></div>
-        <div class="progress-track"><div id="concProgress" class="progress-fill" style="width: 0%;"></div></div>
-      </div>
- 
-      <div id="cardPombais" class="metric-card clickable-card" onclick="buscarPombais()">
-        <span class="card-label">Moradias Verticais Populares (🏢)</span>
-        <div class="metric-group"><span class="metric-value" id="pombaisCount">0</span><span style="font-size: 0.7rem; color: var(--text-dim);">Complexos</span></div>
-        <div class="progress-track"><div id="pombaisProgress" class="progress-fill" style="width: 0%;"></div></div>
-      </div>
- 
-      <div id="cardDens" class="metric-card clickable-card" onclick="analisarMercado()">
-        <span class="card-label">Adensamento Urbano (🏙️)</span>
-        <div class="metric-group"><span class="metric-value" id="densidadeValor">0%</span><span style="font-size: 0.7rem; color: var(--text-dim);">Concentração</span></div>
-        <div class="progress-track"><div id="densidadeProgress" class="progress-fill" style="width: 0%;"></div></div>
-      </div>
+    <div style="margin-bottom: 20px;">
+      <button id="btnAnalisarTudo" onclick="analisarTudoMobile()" class="btn-action"
+        style="width:100%; height: 50px; background: #334155; border: 1px solid var(--accent); color: white; border-radius: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        ⚡ GERAR TODOS OS ÍNDICES
+      </button>
+    </div>
 
-      <div id="analiseCard" class="metric-card" style="display:none;">
-        <span class="card-label">Inteligência de Área</span>
-        <div id="classeNome" style="font-weight:800; margin-bottom:10px; color: #fff;">Aguardando...</div>
-        <div id="perfilUrbano" style="font-size:0.75rem; font-weight:700; color: #fff; margin-bottom:4px;"></div>
-        <div id="populacaoEstimada" style="font-size:0.75rem; font-weight:700; color: #fff; margin-bottom:8px;"></div>
-        
-        <button onclick="gerarVeredito()" id="btnDecisao" class="btn-action primary" style="display: none;">⚖️ ANÁLISE IA LAVAÍ</button>
-        
-        <div id="detalhesAnalise" style="display:none; margin-top:15px; font-size:0.7rem; color:var(--text-dim); line-height:1.6;"></div>
-        <div class="progress-track" style="margin-top: 15px;"><div id="iaProgress" class="progress-fill" style="width: 0%;"></div></div>
+    <div class="mobile-action-grid">
+      <div class="action-card" onclick="triggerMobileAnalysis('mercados')">
+        <div class="action-icon">🛒</div>
+        <div class="action-name">Mercados</div>
+        <div class="action-desc">Mapear âncoras</div>
+      </div>
+      <div class="action-card" onclick="triggerMobileAnalysis('concorrentes')">
+        <div class="action-icon">🧺</div>
+        <div class="action-name">Concorrência</div>
+        <div class="action-desc">Análise direta</div>
+      </div>
+      <div class="action-card" onclick="triggerMobileAnalysis('pombais')">
+        <div class="action-icon">🏢</div>
+        <div class="action-name">Moradias</div>
+        <div class="action-desc">Densidade vertical</div>
+      </div>
+      <div class="action-card" onclick="triggerMobileAnalysis('adensamento')">
+        <div class="action-icon">🏙️</div>
+        <div class="action-name">Veredito IA</div>
+        <div class="action-desc">Score Final</div>
       </div>
     </div>
-    <div class="sidebar-footer">
-      <button onclick="exportarRelatorioCompleto()" class="btn-footer excel">EXCEL</button>
-      <button onclick="exportarPDF()" class="btn-footer pdf">GERAR PDF</button>
-    </div>
-  </aside>
 
-  <main class="map-viewport">
-    <div id="map"></div>
-    <div class="map-mask"></div>
-    <div id="evolutionCards" class="evolution-cards"></div>
-  </main>
+    <div id="btnDecisaoMobile" style="margin-top: 20px;">
+      <button onclick="gerarVeredito()" class="btn-action primary"
+        style="width:100%; height: 55px; border-radius: 12px; font-weight: 800; box-shadow: 0 4px 20px var(--accent-glow);">🚀
+        GERAR VEREDITO ESTRATÉGICO</button>
+    </div>
 
-  <div id="analysisToast" class="analysis-toast">
-    <div class="toast-header">
-      <div class="loading-pulse" style="width: 12px; height: 12px; background: var(--accent); border-radius: 50%;"></div>
-      <span>Expansão Intelligence AI</span>
-      <span id="toastPercent" style="margin-left: auto; color: #fff; font-variant-numeric: tabular-nums;">0%</span>
-    </div>
-    <div id="toastBody" class="toast-body"></div>
-    <div id="mapPip" class="map-pip">
-      <div class="pip-label">ÁREA DE ANÁLISE DETECTADA</div>
-      <div class="pip-kpis">
-        <div class="pip-kpi" title="Supermercados"><span id="pipSuper">0</span> 🛒</div>
-        <div class="pip-kpi" title="Concorrentes"><span id="pipConc">0</span> 🧺</div>
-        <div class="pip-kpi" title="Complexos Populares"><span id="pipPop">0</span> 🏢</div>
-      </div>
-    </div>
-    <div id="toastProgress" class="toast-progress-container">
-      <div id="toastBar" class="toast-progress-bar"></div>
+    <!-- STEP CARDS NA ABA ANALISE (MOBILE) -->
+    <div id="stepsAnaliseContainer" style="margin-top: 24px;">
+      <div
+        style="font-size: 0.65rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+        PROGRESSO DA ANÁLISE</div>
+      <div id="stepsGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
     </div>
   </div>
-</div>
 
-<div class="sidebar-overlay" onclick="expandSidebar()"></div>
+  <div class="dashboard-layout">
+    <nav class="mini-nav">
+      <div class="nav-icon active" onclick="homeMap()" title="Home"><svg width="20" height="20" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg></div>
+      <div class="nav-icon" onclick="document.getElementById('endereco').focus()"><svg width="20" height="20"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg></div>
+      <div class="nav-icon" onclick="exportarRelatorioCompleto()" style="margin-top: auto; color: var(--success);"><svg
+          width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg></div>
+      <div class="nav-icon" onclick="limparMapaCompleto()" style="color: var(--danger);"><svg width="20" height="20"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg></div>
+    </nav>
 
-<div class="map-controls">
-  <button class="control-btn" onclick="map.setZoom(map.getZoom()+1)">+</button>
-  <button class="control-btn" onclick="map.setZoom(map.getZoom()-1)">−</button>
-</div>
+    <aside class="main-sidebar peek" style="position: relative;" onclick="expandSidebar()">
+      <div class="drag-handle"></div>
+      <div class="sidebar-header">
+        <h2>Expansão Inteligente</h2>
+      </div>
+      <div class="sidebar-scroll">
 
-<div class="search-overlay">
-  <div class="input-group">
-    <input type="text" id="endereco" placeholder="Busque um local para iniciar..." autocomplete="off">
-  </div>
-  <button onclick="buscarEndereco()" class="btn-search">BUSCAR</button>
-  <div class="radius-selector">
-    <div class="radius-btn active" onclick="setRaio(500, this)">500m</div>
-    <div class="radius-btn" onclick="setRaio(1000, this)">1km</div>
-    <div class="radius-btn" onclick="setRaio(2000, this)">2km</div>
-  </div>
-</div>
+        <div class="slider-container">
+          <span class="card-label">Raio de Análise: <span id="raioDisplay"
+              style="color: var(--accent);">500m</span></span>
+          <input type="range" min="100" max="3000" value="500" class="radius-slider" id="radiusRange">
+        </div>
 
-<div id="vereditoModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="close-modal" onclick="document.getElementById('vereditoModal').style.display='none'">✕</div>
-    <div class="modal-body" id="modalBody">
-      <!-- Conteúdo dinâmico via JS -->
+        <div id="cardSuper" class="metric-card clickable-card" onclick="buscarSupermercados()">
+          <span class="card-label">Potencial de Mercado (🛒)</span>
+          <div class="metric-group"><span class="metric-value" id="superCount">0</span><span
+              style="font-size: 0.7rem; color: var(--text-dim);">Mercados</span></div>
+          <div class="progress-track">
+            <div id="superProgress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div id="cardConc" class="metric-card clickable-card" onclick="buscarConcorrentes()">
+          <span class="card-label">Índice Concorrência (🏁)</span>
+          <div class="metric-group"><span class="metric-value" id="concCount">0</span><span
+              style="font-size: 0.7rem; color: var(--text-dim);">Lavanderias</span></div>
+          <div class="progress-track">
+            <div id="concProgress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div id="cardPombais" class="metric-card clickable-card" onclick="buscarPombais()">
+          <span class="card-label">Moradias Verticais Populares (🏢)</span>
+          <div class="metric-group"><span class="metric-value" id="pombaisCount">0</span><span
+              style="font-size: 0.7rem; color: var(--text-dim);">Complexos</span></div>
+          <div class="progress-track">
+            <div id="pombaisProgress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div id="cardDens" class="metric-card clickable-card" onclick="analisarMercado()">
+          <span class="card-label">Adensamento Urbano (🏙️)</span>
+          <div class="metric-group"><span class="metric-value" id="densidadeValor">0%</span><span
+              style="font-size: 0.7rem; color: var(--text-dim);">Concentração</span></div>
+          <div class="progress-track">
+            <div id="densidadeProgress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div id="analiseCard" class="metric-card" style="display:none;">
+          <span class="card-label">Inteligência de Área</span>
+          <div id="classeNome" style="font-weight:800; margin-bottom:10px; color: #fff;">Aguardando...</div>
+          <div id="perfilUrbano" style="font-size:0.75rem; font-weight:700; color: #fff; margin-bottom:4px;"></div>
+          <div id="populacaoEstimada" style="font-size:0.75rem; font-weight:700; color: #fff; margin-bottom:8px;"></div>
+
+          <button onclick="gerarVeredito()" id="btnDecisao" class="btn-action primary" style="display: none;">⚖️ ANÁLISE
+            IA LAVAÍ</button>
+
+          <div id="detalhesAnalise"
+            style="display:none; margin-top:15px; font-size:0.7rem; color:var(--text-dim); line-height:1.6;"></div>
+          <div class="progress-track" style="margin-top: 15px;">
+            <div id="iaProgress" class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <button onclick="exportarRelatorioCompleto()" class="btn-footer excel">EXCEL</button>
+        <button onclick="exportarPDF()" class="btn-footer pdf">GERAR PDF</button>
+      </div>
+    </aside>
+
+    <main class="map-viewport">
+      <div id="map"></div>
+      <div class="map-mask"></div>
+      <div id="evolutionCards" class="evolution-cards"></div>
+    </main>
+
+    <div id="analysisToast" class="analysis-toast">
+      <div class="toast-header">
+        <div class="loading-pulse" style="width: 12px; height: 12px; background: var(--accent); border-radius: 50%;">
+        </div>
+        <span>Expansão Intelligence AI</span>
+        <span id="toastPercent" style="margin-left: auto; color: #fff; font-variant-numeric: tabular-nums;">0%</span>
+      </div>
+      <div id="toastBody" class="toast-body"></div>
+      <div id="mapPip" class="map-pip">
+        <div class="pip-label">ÁREA DE ANÁLISE DETECTADA</div>
+        <div class="pip-kpis">
+          <div class="pip-kpi" title="Supermercados"><span id="pipSuper">0</span> 🛒</div>
+          <div class="pip-kpi" title="Concorrentes"><span id="pipConc">0</span> 🧺</div>
+          <div class="pip-kpi" title="Complexos Populares"><span id="pipPop">0</span> 🏢</div>
+        </div>
+      </div>
+      <div id="toastProgress" class="toast-progress-container">
+        <div id="toastBar" class="toast-progress-bar"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  let map, service, geocoder, centroAtual, raioAtual = 500, todosMarcadores = [], circleRaio;
-  let supermercados = [], concorrentes = [], adensDataGlobal = null, analiseGlobal = null;
-  
-  function triggerMobileAnalysis(type) {
-    switchTab('mapa', document.querySelector('.nav-item:first-child'));
-    if (type === 'mercados') buscarSupermercados();
-    else if (type === 'concorrentes') buscarConcorrentes();
-    else if (type === 'pombais') buscarPombais();
-    else if (type === 'adensamento') analisarMercado();
-  }
+  <div class="sidebar-overlay" onclick="expandSidebar()"></div>
 
-  function switchTab(tab, el) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    
-    document.querySelectorAll('.mobile-panel').forEach(p => p.classList.remove('active'));
-    if (tab === 'analise') {
-      document.getElementById('tab-analise').classList.add('active');
-    }
-  }
+  <div class="map-controls">
+    <button class="control-btn" onclick="map.setZoom(map.getZoom()+1)">+</button>
+    <button class="control-btn" onclick="map.setZoom(map.getZoom()-1)">−</button>
+  </div>
 
-  function setRaioMobile(r, el) {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    setRaio(r, document.createElement('div')); // Chama função original
-  }
+  <div class="search-overlay">
+    <div class="input-group">
+      <input type="text" id="endereco" placeholder="Busque um local para iniciar..." autocomplete="off">
+    </div>
+    <button onclick="buscarEndereco()" class="btn-search">BUSCAR</button>
+    <div class="radius-selector">
+      <div class="radius-btn active" onclick="setRaio(500, this)">500m</div>
+      <div class="radius-btn" onclick="setRaio(1000, this)">1km</div>
+      <div class="radius-btn" onclick="setRaio(2000, this)">2km</div>
+    </div>
+  </div>
 
-  function pesquisarEnderecoMobile() {
-    const end = document.getElementById('enderecoMobile').value;
-    if (!end) return;
-    document.getElementById('endereco').value = end;
-    geocoder.geocode({ address: end }, (res, status) => {
-      if (status === "OK") {
-        const loc = res[0].geometry.location;
-        map.setCenter(loc);
-        map.setZoom(16);
-        centroAtual = loc;
-        desenharCirculo(true);
-        switchTab('mapa', document.querySelector('.nav-item:first-child'));
+  <div id="vereditoModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="close-modal" onclick="document.getElementById('vereditoModal').style.display='none'">✕</div>
+      <div class="modal-body" id="modalBody">
+        <!-- Conteúdo dinâmico via JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================================
+    // APIFY LEADMAGNET — Google Maps Scraper (sem chave de API do Google!)
+    // 1. Crie conta GRÁTIS: https://apify.com
+    // 2. Vá em: Settings → Integrations → API Token
+    // 3. Cole o token abaixo
+    // Free tier: $5 crédito/mês (~1.000 resultados gratuitos)
+    // =====================================================================
+    const APIFY_TOKEN = ""; // ← Cole seu token Apify aqui
+    // Actor ID do LeadMagnet (não mude)
+    const LEADMAGNET_ACTOR_ID = "lFSmTCTHDt4Tzw8gP";
+    // =====================================================================
+
+    let map, centroAtual, raioAtual = 500, todosMarcadores = [], circleRaio;
+    let supermercados = [], concorrentes = [], adensDataGlobal = null, analiseGlobal = null;
+
+    // ---- APIFY LEADMAGNET: Busca negócios via Google Maps ----
+    async function fetchLeadMagnet(query, lat, lng, radius, maxResults = 30) {
+      if (!APIFY_TOKEN) return [];
+      try {
+        // 1. Obter nome da localização (com cache para não repetir chamadas)
+        const locationName = await getReverseGeoName(lat, lng);
+        console.log(`[LeadMagnet] Query: "${query}" | Local: "${locationName}"`);
+
+        // 2. Iniciar run
+        const runRes = await fetch(
+          `https://api.apify.com/v2/acts/${LEADMAGNET_ACTOR_ID}/runs?token=${APIFY_TOKEN}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: query,
+              location: locationName,
+              maxResults: maxResults,
+              extractEmails: false,
+              extractReviews: false
+            })
+          }
+        );
+        if (!runRes.ok) {
+          console.warn(`[LeadMagnet] Start run falhou: HTTP ${runRes.status}`);
+          return [];
+        }
+        const runData = await runRes.json();
+        const runId = runData.data?.id;
+        if (!runId) { console.warn('[LeadMagnet] runId não retornado'); return []; }
+        console.log(`[LeadMagnet] Run iniciado: ${runId}`);
+
+        // 3. Polling até SUCCEEDED (max 90s, a cada 3s)
+        let status = 'RUNNING';
+        let datasetId = null;
+        const toastBody2 = document.getElementById('toastBody');
+        for (let i = 0; i < 30 && status === 'RUNNING'; i++) {
+          await new Promise(r => setTimeout(r, 3000));
+          const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`);
+          if (!statusRes.ok) continue;
+          const sd = await statusRes.json();
+          status = sd.data?.status || 'RUNNING';
+          datasetId = sd.data?.defaultDatasetId;
+          const secsLeft = (30 - i - 1) * 3;
+          if (toastBody2 && status === 'RUNNING') {
+            toastBody2.innerHTML = `⏱️ LeadMagnet processando "${query}"... (~${secsLeft}s)`;
+          }
+          console.log(`[LeadMagnet] Poll ${i+1}: ${status}`);
+        }
+        if (status !== 'SUCCEEDED') { console.warn(`[LeadMagnet] Status final: ${status}`); return []; }
+
+        // 4. Buscar itens do dataset
+        const dsRes = await fetch(
+          `https://api.apify.com/v2/datasets/${datasetId}/items?token=${APIFY_TOKEN}&format=json&clean=true`
+        );
+        if (!dsRes.ok) { console.warn('[LeadMagnet] Dataset fetch falhou'); return []; }
+        const items = await dsRes.json();
+        if (!Array.isArray(items)) { console.warn('[LeadMagnet] items não é array'); return []; }
+        console.log(`[LeadMagnet] ${items.length} resultados brutos para "${query}"`);
+
+        // 5. Normalizar campos e filtrar por raio (Haversine)
+        const R = 6371000;
+        const toRad = d => d * Math.PI / 180;
+        return items
+          .map(item => {
+            const iLat = item.latitude ?? item.lat ?? item.location?.lat;
+            const iLng = item.longitude ?? item.lng ?? item.location?.lng ?? item.location?.lon;
+            return { ...item, _lat: parseFloat(iLat), _lng: parseFloat(iLng) };
+          })
+          .filter(item => !isNaN(item._lat) && !isNaN(item._lng))
+          .filter(item => {
+            const dLat = toRad(item._lat - lat);
+            const dLng = toRad(item._lng - lng);
+            const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat)) * Math.cos(toRad(item._lat)) * Math.sin(dLng/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) <= radius;
+          })
+          .map(item => ({
+            lat: item._lat,
+            lng: item._lng,
+            name: item.name || item.title || 'Estabelecimento',
+            vicinity: item.address || item.fullAddress || item.street || '',
+            rating: item.rating ?? item.totalScore ?? null,
+            phone: item.phone || item.phoneNumber || null,
+            website: item.website || item.url || null,
+            tags: { place_id: item.placeId || item.id, source: 'leadmagnet' }
+          }));
+
+      } catch (e) {
+        console.warn('[LeadMagnet] Erro:', e.message);
+        return [];
       }
-    });
-  }
-
-  function expandSidebar() {
-    if (window.innerWidth > 768) return;
-    // Sidebar real no mobile é substituída pelas tabs
-  }
-
-  function showSidebar() {
-    if (window.innerWidth > 768) return;
-    switchTab('analise', document.querySelectorAll('.nav-item')[1]);
-  }
-
-  function plotarPontosLavai() {
-    lavaiPontos.forEach(p => {
-      const marker = new google.maps.Marker({
-        position: { lat: p.lat, lng: p.lng },
-        map,
-        title: p.nome,
-        icon: { url: "lavai.png", scaledSize: new google.maps.Size(42, 42) }
-      });
-      const info = new google.maps.InfoWindow({ content: `<div style="color:#1e293b; padding:5px;"><b>LAVAÍ ${p.nome}</b><br>Unidade Ativa</div>` });
-      marker.addListener("click", () => info.open(map, marker));
-      todosMarcadores.push(marker);
-    });
-  }
-
-  function homeMap() {
-    const base = { lat: -23.53898, lng: -46.64019 };
-    centroAtual = new google.maps.LatLng(base.lat, base.lng);
-    map.setCenter(base);
-    map.setZoom(13);
-    limparMapaCompleto();
-    plotarPontosLavai();
-    desenharCirculo(true);
-  }
-  let passosStatus = { mercados: false, concorrentes: false, pombais: false, adensamento: false };
-  const selfServiceKeywords = ["self", "auto", "60", "express", "minutos", "bubble", "lave", "omo", "laundromat", "bonasecco", "lavateria"];
-  const eliteSP = ["itaim bibi", "vila nova conceição", "moema", "jardins", "jardim paulista", "pinheiros", "vila madalena", "perdizes", "higienópolis", "morumbi", "brooklin", "campo belo", "aclimação", "chácara klabin", "panamby", "alphaville", "tamboré"];
-  const popularSP = ["glicério", "brás", "sé", "pari", "canindé", "grajaú", "capão redondo", "itaquera", "são mateus", "artur alvim", "guaianases", "cidade tiradentes", "brasilândia", "jaraguá", "perus", "anhanguera", "sapopemba"];
-
-  const cdhuLocais = [
-    {nome:"CDHU Itaquera B", lat:-23.5412, lng:-46.4350, classe:'E', densidade:1500, fluxo:2500, aptos:450, obs:'Altíssima densidade. Lavagem manual predominante.'},
-    {nome:"Conjunto Hab. Cingapura - Glicério", lat:-23.5530, lng:-46.6260, classe:'E', densidade:1800, fluxo:3200, aptos:380, obs:'Ponto crítico de fluxo. Alta rotatividade.'},
-    {nome:"CDHU Vila Pantanal", lat:-23.5120, lng:-46.4180, classe:'D', densidade:1200, fluxo:1800, aptos:520, obs:'Sem lavanderias num raio de 3km.'},
-    {nome:"Conjunto Hab. Jaguara", lat:-23.5134, lng:-46.7456, classe:'D', densidade:1100, fluxo:1500, aptos:280, obs:'Público C/D. Bom fluxo para supermercado vizinho.'},
-    {nome:"CDHU Heliópolis", lat:-23.6050, lng:-46.5980, classe:'E', densidade:2200, fluxo:4500, aptos:850, obs:'Maior favela de SP. Demanda massiva para LAVAÍ.'},
-    {nome:"Conjunto Hab. Cingapura - Zaki Narchi", lat:-23.5100, lng:-46.6150, classe:'E', densidade:1600, fluxo:2800, aptos:420, obs:'Próximo ao metrô Carandiru. Fluxo pendular alto.'},
-    {nome:"CDHU Jaguaré", lat:-23.5450, lng:-46.7580, classe:'D', densidade:1300, fluxo:1900, aptos:310, obs:'Crescimento urbano. Público trabalha em serviços.'},
-    {nome:"Conjunto Hab. Vila Maria", lat:-23.5020, lng:-46.5780, classe:'D', densidade:1150, fluxo:1650, aptos:290, obs:'Forte presença de comércio popular local.'},
-    {nome:"CDHU Paraisópolis", lat:-23.6150, lng:-46.7230, classe:'E', densidade:2100, fluxo:4000, aptos:780, obs:'Região de alta densidade vertical popular.'},
-    {nome:"Conjunto Hab. Cidade Tiradentes - Setor G", lat:-23.5850, lng:-46.4020, classe:'E', densidade:1400, fluxo:2100, aptos:920, obs:'Dormitório massivo. Necessidade urgente de automação.'}
-  ];
-
-  const studiosLocais = [
-    {nome:"Vitra Studios - Centro", lat:-23.5420, lng:-46.6380, m2:28, aptos:180, obs:'Unidades sem área de serviço. Demanda garantida.'},
-    {nome:"Noman Brooklin", lat:-23.6100, lng:-46.6910, m2:32, aptos:210, obs:'Foco em executivos e estudantes. Alta necessidade de self-service.'},
-    {nome:"Setin Downtown República", lat:-23.5435, lng:-46.6430, m2:25, aptos:320, obs:'Localização premium para studios. Sem espaço para máquinas individuais.'},
-    {nome:"VN Quatá - Vila Olímpia", lat:-23.5950, lng:-46.6780, m2:30, aptos:150, obs:'Prédio moderno de compactos. Público jovem e dinâmico.'},
-    {nome:"You, Prime Vila Mariana", lat:-23.5880, lng:-46.6350, m2:35, aptos:240, obs:'Próximo ao metrô. Muitos moradores solteiros.'},
-    {nome:"Smart Santa Cecília", lat:-23.5390, lng:-46.6520, m2:22, aptos:190, obs:'Tamanho extremamente reduzido (22m2). Uso obrigatório de lavanderia externa.'},
-    {nome:"Housi Bela Cintra", lat:-23.5580, lng:-46.6620, m2:29, aptos:280, obs:'Modelo de moradia flexível. Alta rotatividade de hóspedes/moradores.'}
-  ];
-
-  const lavaiPontos = [
-    {nome:"Extra Itaquera", lat:-23.551459, lng:-46.437231},
-    {nome:"Extra Vila Mariana", lat:-23.579763, lng:-46.640401},
-    {nome:"Extra Barra Funda", lat:-23.531399, lng:-46.660490},
-    {nome:"Dia Brooklin", lat:-23.608603, lng:-46.689008},
-    {nome:"Extra São Caetano", lat:-23.642638, lng:-46.560717},
-    {nome:"Extra São Bernardo", lat:-23.720037, lng:-46.578314},
-    {nome:"Merc Teotônio", lat:-23.606867, lng:-46.501738},
-    {nome:"Merc São Miguel", lat:-23.493640, lng:-46.439807},
-    {nome:"Extra Rego Freitas", lat:-23.543115, lng:-46.646946},
-    {nome:"Extra Belenzinho", lat:-23.540364, lng:-46.594962},
-    {nome:"Graça Teotônio", lat:-23.605745, lng:-46.503232},
-    {nome:"Dia Barra Funda", lat:-23.531885, lng:-46.649302},
-    {nome:"Extra Rio Branco", lat:-23.538773, lng:-46.640208},
-    {nome:"Extra Palmeiras", lat:-23.537548, lng:-46.651225},
-    {nome:"Extra Glicério", lat:-23.553164, lng:-46.627977},
-    {nome:"Mini Extra São João", lat:-23.541801, lng:-46.640585},
-    {nome:"Mini Extra Rio Branco", lat:-23.540456, lng:-46.638842}
-  ];
-
-  async function getAdensamentoData(lat, lng, radius) {
-    const query = `[out:json][timeout:15];(way["building"](around:${radius},${lat},${lng});relation["building"](around:${radius},${lat},${lng}););out count;`;
-    try {
-      const r = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-      const d = await r.json();
-      const count = d.elements && d.elements[0] ? parseInt(d.elements[0].tags.total) || 120 : 120;
-      const mockPerc = Math.min(30 + (count / 10), 95);
-      return { perc: mockPerc, mAndares: 4, total: count, vertical: mockPerc > 70 ? "ALTO" : (mockPerc > 40 ? "MÉDIO" : "BAIXO") };
-    } catch(e) { 
-      const mockPerc = Math.min(35 + (supermercados.length * 5) + (concorrentes.length * 2), 85);
-      return { perc: mockPerc, mAndares: 4, total: Math.round(mockPerc * 5), vertical: mockPerc > 70 ? "ALTO" : "MÉDIO" }; 
     }
-  }
 
-  function initMap() {
-    const base = { lat: -23.53898, lng: -46.64019 };
-    map = new google.maps.Map(document.getElementById("map"), {
-      center: base,
-      zoom: 13,
-      styles: [
-        { "elementType": "geometry", "stylers": [{ "color": "#eef2ff" }] },
-        { "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] },
-        { "elementType": "labels.text.fill", "stylers": [{ "color": "#475569" }] },
-        { "elementType": "labels.text.stroke", "stylers": [{ "color": "#eef2ff" }] },
-        { "featureType": "administrative.land_parcel", "elementType": "labels.text.fill", "stylers": [{ "color": "#94a3b8" }] },
-        { "featureType": "poi", "elementType": "geometry", "stylers": [{ "color": "#e0e7ff" }] },
-        { "featureType": "poi", "elementType": "labels.text.fill", "stylers": [{ "color": "#64748b" }] },
-        { "featureType": "poi.park", "elementType": "geometry", "stylers": [{ "color": "#dbeafe" }] },
-        { "featureType": "poi.park", "elementType": "labels.text.fill", "stylers": [{ "color": "#3b82f6" }] },
-        { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#ffffff" }] },
-        { "featureType": "road.arterial", "elementType": "labels.text.fill", "stylers": [{ "color": "#64748b" }] },
-        { "featureType": "road.highway", "elementType": "geometry", "stylers": [{ "color": "#cbd5e1" }] },
-        { "featureType": "road.highway", "elementType": "labels.text.fill", "stylers": [{ "color": "#475569" }] },
-        { "featureType": "road.local", "elementType": "labels.text.fill", "stylers": [{ "color": "#94a3b8" }] },
-        { "featureType": "transit.line", "elementType": "geometry", "stylers": [{ "color": "#d1d5db" }] },
-        { "featureType": "transit.station", "elementType": "geometry", "stylers": [{ "color": "#e0e7ff" }] },
-        { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#bfdbfe" }] },
-        { "featureType": "water", "elementType": "labels.text.fill", "stylers": [{ "color": "#1e40af" }] }
-      ],
-      disableDefaultUI: true
-    });
-    geocoder = new google.maps.Geocoder();
-    service = new google.maps.places.PlacesService(map);
-    centroAtual = map.getCenter();
-    desenharCirculo();
-    plotarPontosLavai();
+    async function fetchOverpassSafe(query) {
+      const mirrors = [
+        "https://lz4.overpass-api.de/api/interpreter",
+        "https://z.overpass-api.de/api/interpreter",
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter"
+      ];
+      
+      const fetchWithTimeout = async (url) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), 12000); // 12 segundos max
+        const options = {
+          method: "POST",
+          body: "data=" + encodeURIComponent(query),
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json"
+          },
+          signal: controller.signal
+        };
+        try {
+          const res = await fetch(url, options);
+          clearTimeout(id);
+          if (!res.ok) throw new Error("Falha HTTP: " + res.status);
+          return await res.json();
+        } catch (e) {
+          clearTimeout(id);
+          throw e;
+        }
+      };
 
-    document.getElementById("radiusRange").addEventListener("input", (e) => {
-      const val = parseInt(e.target.value);
-      raioAtual = val;
-      document.getElementById("raioDisplay").innerText = val >= 1000 ? (val/1000).toFixed(1) + "km" : val + "m";
-      if (circleRaio) circleRaio.setRadius(val);
-    });
-  }
+      try {
+        return await Promise.any(mirrors.map(m => fetchWithTimeout(m)));
+      } catch (e) {
+        console.error("Todos os servidores Overpass falharam ou deram timeout.");
+        throw new Error("Falha na consulta Overpass.");
+      }
+    }
 
-  function setRaio(r, btn) {
-    raioAtual = r;
-    document.querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById("radiusRange").value = r;
-    document.getElementById("raioDisplay").innerText = r >= 1000 ? (r/1000) + "km" : r + "m";
-    if (circleRaio) {
-      circleRaio.setRadius(r);
-      const bounds = circleRaio.getBounds();
-      map.fitBounds(bounds);
-    } else {
+    async function fetchNominatim(q, lat, lng, raio) {
+      const r = raio / 111320;
+      const latCos = Math.cos(lat * Math.PI / 180);
+      const minLon = lng - (r / latCos);
+      const maxLon = lng + (r / latCos);
+      const minLat = lat - r;
+      const maxLat = lat + r;
+      await new Promise(res => setTimeout(res, 1200));
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&viewbox=${minLon},${maxLat},${maxLon},${minLat}&bounded=1&limit=50&countrycodes=br`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR', 'User-Agent': 'LavaiExpansionEngine/2.0' } });
+      if (!res.ok) throw new Error("Nominatim " + res.status);
+      return await res.json();
+    }
+
+    // Busca multi-source: OSM Overpass + Nominatim com múltiplos termos
+    async function fetchLavanderiasArea(lat, lng, raio) {
+      const resultados = new Map();
+
+      // --- FONTE 1: Overpass com tags OSM padrão + nome regex (query single-line obrigatório) ---
+      try {
+        const q = `[out:json][timeout:25];(node["shop"~"laundry"](around:${raio},${lat},${lng});way["shop"~"laundry"](around:${raio},${lat},${lng});node["amenity"~"laundry"](around:${raio},${lat},${lng});way["amenity"~"laundry"](around:${raio},${lat},${lng}););out center;`;
+        const data = await fetchOverpassSafe(q);
+        if (data.elements) {
+          data.elements.forEach(el => {
+            const eLat = el.lat || (el.center && el.center.lat);
+            const eLon = el.lon || (el.center && el.center.lon);
+            if (!eLat || !eLon) return;
+            const t = el.tags || {};
+            const key = `${parseFloat(eLat).toFixed(5)}_${parseFloat(eLon).toFixed(5)}`;
+            if (!resultados.has(key)) {
+              resultados.set(key, {
+                lat: eLat, lng: eLon,
+                name: t.name || t['name:pt'] || 'Lavanderia',
+                vicinity: t['addr:street'] ? `${t['addr:street']}${t['addr:housenumber'] ? ', ' + t['addr:housenumber'] : ''}` : (t['addr:suburb'] || 'Detectado via OSM'),
+                tags: t, source: 'overpass'
+              });
+            }
+          });
+        }
+      } catch (e) { console.warn('Overpass lavanderia falhou:', e.message); }
+
+      // --- FONTE 2: Nominatim com termos brasileiros (se Overpass encontrou pouco) ---
+      if (resultados.size < 3) {
+        const termos = ['lavanderia', 'dry cleaning', 'laundry'];
+        for (const termo of termos) {
+          try {
+            await new Promise(r => setTimeout(r, 800));
+            const items = await fetchNominatim(termo, lat, lng, raio);
+            if (items && items.length > 0) {
+              items.forEach(el => {
+                const eLat = parseFloat(el.lat), eLon = parseFloat(el.lon);
+                const key = `${eLat.toFixed(5)}_${eLon.toFixed(5)}`;
+                if (!resultados.has(key)) {
+                  resultados.set(key, {
+                    lat: eLat, lng: eLon,
+                    name: el.name || el.display_name.split(',')[0] || 'Lavanderia',
+                    vicinity: (el.display_name || '').split(',').slice(0, 2).join(','),
+                    tags: {}, source: 'nominatim'
+                  });
+                }
+              });
+            }
+          } catch (e) { console.warn(`Nominatim '${termo}' falhou:`, e.message); }
+          if (resultados.size >= 5) break;
+        }
+      }
+
+      return Array.from(resultados.values());
+    }
+
+    // Busca de potencial de mercado via OSM (supermercados + âncoras de fluxo)
+    async function fetchPolosMercado(lat, lng, raio) {
+      const resultados = new Map();
+      try {
+        const q = `[out:json][timeout:25];(node["shop"~"supermarket|grocery|convenience"](around:${raio},${lat},${lng});way["shop"~"supermarket|grocery|convenience"](around:${raio},${lat},${lng}););out center;`;
+        const data = await fetchOverpassSafe(q);
+        if (data.elements) {
+          data.elements.forEach(el => {
+            const eLat = el.lat || (el.center && el.center.lat);
+            const eLon = el.lon || (el.center && el.center.lon);
+            if (!eLat || !eLon) return;
+            const t = el.tags || {};
+            const key = `${parseFloat(eLat).toFixed(5)}_${parseFloat(eLon).toFixed(5)}`;
+            if (!resultados.has(key)) {
+              resultados.set(key, {
+                lat: eLat, lng: eLon,
+                name: t.name || t['brand'] || 'Estabelecimento',
+                rating: null,
+                vicinity: t['addr:street'] || t['addr:suburb'] || '',
+                type: t.shop || t.amenity || '',
+                tags: t
+              });
+            }
+          });
+        }
+      } catch (e) {
+        // Fallback Nominatim
+        try {
+          await new Promise(r => setTimeout(r, 800));
+          const items = await fetchNominatim('supermercado', lat, lng, raio);
+          if (items) items.forEach(el => {
+            const eLat = parseFloat(el.lat), eLon = parseFloat(el.lon);
+            const key = `${eLat.toFixed(5)}_${eLon.toFixed(5)}`;
+            if (!resultados.has(key)) resultados.set(key, { lat: eLat, lng: eLon, name: el.name || 'Mercado', rating: null, vicinity: '', type: 'supermarket', tags: {} });
+          });
+        } catch (e2) { console.warn('Nominatim mercado falhou:', e2.message); }
+      }
+      return Array.from(resultados.values());
+    }
+
+
+    async function analisarTudoMobile() {
+      const btn = document.getElementById('btnAnalisarTudo');
+      if (btn) {
+        btn.classList.add('loading-pulse');
+        btn.innerHTML = "⏳ ANALISANDO...";
+      }
+
+      // Manter na aba ANALISE para ver os steps chegando
+      switchTab('analise', document.querySelectorAll('.nav-item')[1]);
+      document.getElementById("evolutionCards").innerHTML = "";
+      const stepsGrid = document.getElementById("stepsGrid");
+      if (stepsGrid) stepsGrid.innerHTML = "";
+
+      try {
+        await buscarSupermercados();
+        await new Promise(r => setTimeout(r, 800));
+        await buscarConcorrentes();
+        await new Promise(r => setTimeout(r, 800));
+        await buscarPombais();
+        await new Promise(r => setTimeout(r, 800));
+        await analisarMercado();
+        await new Promise(r => setTimeout(r, 1500));
+        await gerarVeredito();
+      } catch (e) {
+        console.error("Erro na análise total:", e);
+      } finally {
+        const btn = document.getElementById('btnAnalisarTudo');
+        if (btn) {
+          btn.classList.remove('loading-pulse');
+          btn.innerHTML = "⚡ GERAR TODOS OS ÍNDICES";
+        }
+        // Garantir que aba ANALISE está visível com os steps
+        switchTab('analise', document.querySelectorAll('.nav-item')[1]);
+      }
+    }
+
+    // Versão DESKTOP: executa pipeline sem mudar tabs
+    async function analisarTudoDesktop() {
+      const btnSearch = document.querySelector('.btn-search');
+      document.getElementById("evolutionCards").innerHTML = "";
+      const stepsGrid = document.getElementById("stepsGrid");
+      if (stepsGrid) stepsGrid.innerHTML = "";
+      try {
+        await buscarSupermercados();
+        await new Promise(r => setTimeout(r, 800));
+        await buscarConcorrentes();
+        await new Promise(r => setTimeout(r, 800));
+        await buscarPombais();
+        await new Promise(r => setTimeout(r, 800));
+        await analisarMercado();
+        await new Promise(r => setTimeout(r, 1500));
+        await gerarVeredito();
+      } catch (e) {
+        console.error("Erro na análise desktop:", e);
+      }
+    }
+
+    function triggerMobileAnalysis(type) {
+      // Ficar na aba ANALISE para ver o step aparecer
+      switchTab('analise', document.querySelectorAll('.nav-item')[1]);
+      if (type === 'mercados') buscarSupermercados();
+      else if (type === 'concorrentes') buscarConcorrentes();
+      else if (type === 'pombais') buscarPombais();
+      else if (type === 'adensamento') analisarMercado();
+    }
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      document.querySelectorAll('.mobile-panel').forEach(p => p.classList.remove('active'));
+      if (tab === 'analise') {
+        document.getElementById('tab-analise').classList.add('active');
+      } else if (tab === 'mapa' && typeof map !== 'undefined' && map) {
+        setTimeout(() => map.invalidateSize(), 300);
+      }
+    }
+
+    function setRaioMobile(r, el) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      setRaio(r, document.createElement('div')); // Chama função original
+    }
+
+    async function pesquisarEnderecoMobile() {
+      const end = document.getElementById('enderecoMobile').value;
+      if (!end) return;
+      document.getElementById('endereco').value = end;
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(end)}`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const loc = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+          map.setView([loc.lat, loc.lng], 16);
+          centroAtual = L.latLng(loc.lat, loc.lng);
+          desenharCirculo(true);
+          analisarTudoMobile();
+        }
+      } catch (e) {
+        console.error("Erro no geocoding mobile:", e);
+      }
+    }
+
+    function expandSidebar() {
+      if (window.innerWidth > 768) return;
+      // Sidebar real no mobile é substituída pelas tabs
+    }
+
+    function showSidebar() {
+      if (window.innerWidth > 768) return;
+      switchTab('analise', document.querySelectorAll('.nav-item')[1]);
+    }
+
+    function plotarPontosLavai() {
+      lavaiPontos.forEach(p => {
+        const marker = L.marker([p.lat, p.lng], {
+          icon: L.icon({
+            iconUrl: "lavai.png",
+            iconSize: [42, 42],
+            iconAnchor: [21, 21]
+          })
+        }).addTo(map);
+        marker.bindPopup(`<div style="color:#1e293b; padding:5px;"><b>LAVAÍ ${p.nome}</b><br>Unidade Ativa</div>`);
+        todosMarcadores.push(marker);
+      });
+    }
+
+    function homeMap() {
+      const base = { lat: -23.53898, lng: -46.64019 };
+      centroAtual = L.latLng(base.lat, base.lng);
+      map.setView([base.lat, base.lng], 13);
+      limparMapaCompleto();
+      plotarPontosLavai();
       desenharCirculo(true);
     }
-  }
+    let passosStatus = { mercados: false, concorrentes: false, pombais: false, adensamento: false };
+    const selfServiceKeywords = ["self", "auto", "60", "express", "minutos", "bubble", "lave", "omo", "laundromat", "bonasecco", "lavateria"];
+    const eliteSP = ["itaim bibi", "vila nova conceição", "moema", "jardins", "jardim paulista", "pinheiros", "vila madalena", "perdizes", "higienópolis", "morumbi", "brooklin", "campo belo", "aclimação", "chácara klabin", "panamby", "alphaville", "tamboré"];
+    const popularSP = ["glicério", "brás", "sé", "pari", "canindé", "grajaú", "capão redondo", "itaquera", "são mateus", "artur alvim", "guaianases", "cidade tiradentes", "brasilândia", "jaraguá", "perus", "anhanguera", "sapopemba"];
 
-  function desenharCirculo(ajustarZoom = false) {
-    if (circleRaio) circleRaio.setMap(null);
-    circleRaio = new google.maps.Circle({
-      strokeColor: "#06b6d4", strokeOpacity: 0.8, strokeWeight: 2,
-      fillColor: "#06b6d4", fillOpacity: 0.15,
-      map, center: centroAtual, radius: raioAtual, 
-      clickable: true, editable: true, draggable: true
-    });
+    const cdhuLocais = [
+      { nome: "CDHU Itaquera B", lat: -23.5412, lng: -46.4350, classe: 'E', densidade: 1500, fluxo: 2500, aptos: 450, obs: 'Altíssima densidade. Lavagem manual predominante.' },
+      { nome: "Conjunto Hab. Cingapura - Glicério", lat: -23.5530, lng: -46.6260, classe: 'E', densidade: 1800, fluxo: 3200, aptos: 380, obs: 'Ponto crítico de fluxo. Alta rotatividade.' },
+      { nome: "CDHU Vila Pantanal", lat: -23.5120, lng: -46.4180, classe: 'D', densidade: 1200, fluxo: 1800, aptos: 520, obs: 'Sem lavanderias num raio de 3km.' },
+      { nome: "Conjunto Hab. Jaguara", lat: -23.5134, lng: -46.7456, classe: 'D', densidade: 1100, fluxo: 1500, aptos: 280, obs: 'Público C/D. Bom fluxo para supermercado vizinho.' },
+      { nome: "CDHU Heliópolis", lat: -23.6050, lng: -46.5980, classe: 'E', densidade: 2200, fluxo: 4500, aptos: 850, obs: 'Maior favela de SP. Demanda massiva para LAVAÍ.' },
+      { nome: "Conjunto Hab. Cingapura - Zaki Narchi", lat: -23.5100, lng: -46.6150, classe: 'E', densidade: 1600, fluxo: 2800, aptos: 420, obs: 'Próximo ao metrô Carandiru. Fluxo pendular alto.' },
+      { nome: "CDHU Jaguaré", lat: -23.5450, lng: -46.7580, classe: 'D', densidade: 1300, fluxo: 1900, aptos: 310, obs: 'Crescimento urbano. Público trabalha em serviços.' },
+      { nome: "Conjunto Hab. Vila Maria", lat: -23.5020, lng: -46.5780, classe: 'D', densidade: 1150, fluxo: 1650, aptos: 290, obs: 'Forte presença de comércio popular local.' },
+      { nome: "CDHU Paraisópolis", lat: -23.6150, lng: -46.7230, classe: 'E', densidade: 2100, fluxo: 4000, aptos: 780, obs: 'Região de alta densidade vertical popular.' },
+      { nome: "Conjunto Hab. Cidade Tiradentes - Setor G", lat: -23.5850, lng: -46.4020, classe: 'E', densidade: 1400, fluxo: 2100, aptos: 920, obs: 'Dormitório massivo. Necessidade urgente de automação.' }
+    ];
 
-    google.maps.event.addListener(circleRaio, 'radius_changed', () => {
-      raioAtual = Math.round(circleRaio.getRadius());
-      document.getElementById("radiusRange").value = raioAtual;
-      document.getElementById("raioDisplay").innerText = raioAtual >= 1000 ? (raioAtual/1000).toFixed(1) + "km" : raioAtual + "m";
-    });
+    const studiosLocais = [
+      { nome: "Vitra Studios - Centro", lat: -23.5420, lng: -46.6380, m2: 28, aptos: 180, obs: 'Unidades sem área de serviço. Demanda garantida.' },
+      { nome: "Noman Brooklin", lat: -23.6100, lng: -46.6910, m2: 32, aptos: 210, obs: 'Foco em executivos e estudantes. Alta necessidade de self-service.' },
+      { nome: "Setin Downtown República", lat: -23.5435, lng: -46.6430, m2: 25, aptos: 320, obs: 'Localização premium para studios. Sem espaço para máquinas individuais.' },
+      { nome: "VN Quatá - Vila Olímpia", lat: -23.5950, lng: -46.6780, m2: 30, aptos: 150, obs: 'Prédio moderno de compactos. Público jovem e dinâmico.' },
+      { nome: "You, Prime Vila Mariana", lat: -23.5880, lng: -46.6350, m2: 35, aptos: 240, obs: 'Próximo ao metrô. Muitos moradores solteiros.' },
+      { nome: "Smart Santa Cecília", lat: -23.5390, lng: -46.6520, m2: 22, aptos: 190, obs: 'Tamanho extremamente reduzido (22m2). Uso obrigatório de lavanderia externa.' },
+      { nome: "Housi Bela Cintra", lat: -23.5580, lng: -46.6620, m2: 29, aptos: 280, obs: 'Modelo de moradia flexível. Alta rotatividade de hóspedes/moradores.' }
+    ];
 
-    google.maps.event.addListener(circleRaio, 'center_changed', () => {
-      centroAtual = circleRaio.getCenter();
-      geocoder.geocode({ location: centroAtual }, (r) => {
-        if (r && r[0]) document.getElementById("endereco").value = r[0].formatted_address;
-      });
-    });
+    const lavaiPontos = [
+      { nome: "Extra Itaquera", lat: -23.551459, lng: -46.437231 },
+      { nome: "Extra Vila Mariana", lat: -23.579763, lng: -46.640401 },
+      { nome: "Extra Barra Funda", lat: -23.531399, lng: -46.660490 },
+      { nome: "Dia Brooklin", lat: -23.608603, lng: -46.689008 },
+      { nome: "Extra São Caetano", lat: -23.642638, lng: -46.560717 },
+      { nome: "Extra São Bernardo", lat: -23.720037, lng: -46.578314 },
+      { nome: "Merc Teotônio", lat: -23.606867, lng: -46.501738 },
+      { nome: "Merc São Miguel", lat: -23.493640, lng: -46.439807 },
+      { nome: "Extra Rego Freitas", lat: -23.543115, lng: -46.646946 },
+      { nome: "Extra Belenzinho", lat: -23.540364, lng: -46.594962 },
+      { nome: "Graça Teotônio", lat: -23.605745, lng: -46.503232 },
+      { nome: "Dia Barra Funda", lat: -23.531885, lng: -46.649302 },
+      { nome: "Extra Rio Branco", lat: -23.538773, lng: -46.640208 },
+      { nome: "Extra Palmeiras", lat: -23.537548, lng: -46.651225 },
+      { nome: "Extra Glicério", lat: -23.553164, lng: -46.627977 },
+      { nome: "Mini Extra São João", lat: -23.541801, lng: -46.640585 },
+      { nome: "Mini Extra Rio Branco", lat: -23.540456, lng: -46.638842 }
+    ];
 
-    if (ajustarZoom) {
-      const bounds = circleRaio.getBounds();
-      map.fitBounds(bounds);
+    function getTileUrl(lat, lng, zoom) {
+      const n = Math.pow(2, zoom);
+      const x = Math.floor((lng + 180) / 360 * n);
+      const latRad = lat * Math.PI / 180;
+      const y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+      return `https://a.basemaps.cartocdn.com/rastertiles/voyager/${zoom}/${x}/${y}.png`;
     }
-  }
 
-  function atualizarPipMapa() {
-    const pip = document.getElementById("mapPip");
-    if (!pip) return;
-    
-    const zoomMap = { 100: 17, 500: 15, 1000: 14, 2000: 13, 3000: 12 };
-    const zoomLevel = zoomMap[raioAtual] || 15;
-    const apiKey = 'AIzaSyBBYgZYvQbrGjs9oxulIly4D0OjSnokX5s';
-    
-    // Removido o estilo dark para ser colorido
-    const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${centroAtual.lat()},${centroAtual.lng()}&zoom=${zoomLevel}&size=800x250&scale=2&maptype=roadmap&key=${apiKey}`;
-    
-    pip.style.backgroundImage = `url('${staticMapUrl}')`;
-    pip.style.display = "block";
-    pip.classList.add("loading-pulse");
-
-    // Atualiza KPIs no PiP
-    document.getElementById("pipSuper").innerText = supermercados.length;
-    document.getElementById("pipConc").innerText = (concorrentes || []).length;
-    document.getElementById("pipPop").innerText = document.getElementById("pombaisCount").innerText;
-  }
-
-  function adicionarEvolutionCard(step, title, value, extraClass = "") {
-    if (!centroAtual) return;
-    const container = document.getElementById("evolutionCards");
-    
-    const zoomMap = { 100: 17, 500: 15, 1000: 14, 2000: 13, 3000: 12 };
-    const zoomLevel = zoomMap[raioAtual] || 15;
-    const apiKey = 'AIzaSyBBYgZYvQbrGjs9oxulIly4D0OjSnokX5s';
-    const staticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${centroAtual.lat()},${centroAtual.lng()}&zoom=${zoomLevel}&size=500x200&scale=2&maptype=roadmap&key=${apiKey}`;
-    
-    const card = document.createElement("div");
-    card.className = "evolution-card " + extraClass;
-    card.innerHTML = `
-      <div class="ev-step">${step}</div>
-      <div class="ev-title">${title}</div>
-      <div class="ev-value">${value}</div>
-      <div class="ev-print" style="background-image: url('${staticMapUrl}')"></div>
-    `;
-    container.appendChild(card);
-  }
-
-  function buscarEndereco() {
-    if (!geocoder) return;
-    geocoder.geocode({ address: document.getElementById("endereco").value }, (r, s) => {
-      if (s === "OK") { 
-        centroAtual = r[0].geometry.location; 
-        map.setCenter(centroAtual); 
-        if (circleRaio) circleRaio.setCenter(centroAtual);
-        else desenharCirculo(true); 
-        limparMapaCompleto(true); // Parâmetro true para manter o texto do input
+    async function getAdensamentoData(lat, lng, radius) {
+      try {
+        // Busca prédios com mais de 3 andares via Overpass (single-line obrigatório)
+        const q = `[out:json][timeout:20];(way["building"~"(apartments|residential|yes|commercial|office)"]["building:levels"~"[3-9]|[0-9]{2,}"](around:${radius},${lat},${lng});way["building"="apartments"](around:${radius},${lat},${lng}););out body center;`;
+        const data = await fetchOverpassSafe(q);
+        const total = data.elements ? data.elements.length : 0;
+        const maxEsperado = Math.max(30, radius / 20);
+        const perc = Math.min(Math.round((total / maxEsperado) * 100), 100);
+        const vertical = perc > 65 ? "ALTO" : perc > 35 ? "MÉDIO" : "BAIXO";
+        return { perc: Math.max(perc, 15), mAndares: 4, total, vertical };
+      } catch (e) {
+        // Heurística baseada nos dados já coletados
+        const supers = (supermercados || []).length;
+        const concs = (concorrentes || []).length;
+        const mockPerc = Math.min(30 + (supers * 4) + (concs * 3), 85);
+        return { perc: mockPerc, mAndares: 4, total: Math.round(mockPerc * 5), vertical: mockPerc > 65 ? "ALTO" : "MÉDIO" };
       }
-    });
-  }
+    }
 
-  function renderMarkerLabel(name, rating, type, index = '') {
-    const icons = { 'concorrente': '🧺', 'mercado': '🛒', 'pombais': '🏢' };
-    const icon = icons[type] || '📍';
-    let cleanName = name.replace(/Lavanderia|Self-Service|Laundry|Express|Unidade|Supermercado|Conjunto|Habitacional|CDHU/gi, '').trim();
-    let prefix = type === 'concorrente' ? `C${index}-` : (type === 'mercado' ? `M${index}-` : `P${index}-`);
-    let displayName = (prefix + cleanName).substring(0, 15) + ` ${icon}${rating || ''}`;
-    return { text: displayName, color: "#0f172a", fontSize: "10px", fontWeight: "900", className: "map-card-label" };
-  }
+    function initMap() {
+      const base = { lat: -23.53898, lng: -46.64019 };
+      map = L.map('map', {
+        center: [base.lat, base.lng],
+        zoom: 13,
+        zoomControl: false,
+        attributionControl: false
+      });
 
-  function createInteractiveMarker(p, type, index = '') {
-    const icons = {
-      'mercado': 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-      'concorrente': 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-      'pombais': 'https://cdn-icons-png.flaticon.com/512/1018/1018573.png'
-    };
-    const pos = p.geometry ? p.geometry.location : p.position;
-    const name = p.name || p.title;
-    const marker = new google.maps.Marker({
-      position: pos, map,
-      icon: { url: icons[type], scaledSize: new google.maps.Size(36, 36), labelOrigin: new google.maps.Point(18, -12) },
-      label: renderMarkerLabel(name, p.rating, type, index),
-      category: type
-    });
-    const info = new google.maps.InfoWindow({ content: `<div style="color:#000; padding:10px;"><b>${name}</b><br>${p.vicinity || p.obs || ''}</div>` });
-    marker.addListener('click', () => info.open(map, marker));
-    todosMarcadores.push(marker);
-    return marker;
-  }
+      // Light Premium Theme (CartoDB Voyager)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
 
-  async function buscarPombais() {
-    if (circleRaio) map.fitBounds(circleRaio.getBounds());
-    const btn = event.currentTarget;
-    btn.classList.add('loading-pulse');
-    document.getElementById("pombaisProgress").style.width = "50%";
-    
-    const toast = document.getElementById("analysisToast");
-    const toastBody = document.getElementById("toastBody");
-    const toastProgress = document.getElementById("toastProgress");
-    const toastBar = document.getElementById("toastBar");
-    
-    toast.style.display = "block"; toast.style.opacity = "1";
-    toastProgress.style.display = "block";
-    toastBar.style.width = "0%";
-    document.getElementById("toastPercent").innerText = "0%";
-    
-    atualizarPipMapa();
-    
-    typeWriter(toastBody, "Escaneando zonas de adensamento vertical. Localizando CDHUs, prédios populares e studios residenciais...");
-    limparMarcadoresPorTipo('pombais');
-    toastBar.style.width = "40%";
-    document.getElementById("toastPercent").innerText = "40%";
-    
-    let count = 0;
-    let foundIds = new Set();
+      centroAtual = L.latLng(base.lat, base.lng);
+      desenharCirculo();
+      plotarPontosLavai();
 
-    cdhuLocais.forEach((loc, i) => {
-      const pos = new google.maps.LatLng(loc.lat, loc.lng);
-      if (google.maps.geometry.spherical.computeDistanceBetween(centroAtual, pos) <= raioAtual) {
-        createInteractiveMarker({ position: pos, title: loc.nome, obs: loc.obs }, 'pombais', `B${i + 1}`);
-        count++;
+      map.on("move", () => {
+        centroAtual = map.getCenter();
+        if (circleRaio) {
+          circleRaio.setLatLng(centroAtual);
+        }
+      });
+
+      map.on("moveend", async () => {
+        const center = map.getCenter();
+        _cachedLocationName = null;
+        _cachedLocationCoord = null;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.address) {
+            const road = data.address.road || data.address.pedestrian || data.address.suburb || data.address.city || "";
+            const num = data.address.house_number || "";
+            const location = `${road}${num ? ', ' + num : ''}`;
+            if (location) {
+              const inputDesktop = document.getElementById("endereco");
+              const inputMobile = document.getElementById("enderecoMobile");
+              if (inputDesktop) inputDesktop.value = location;
+              if (inputMobile) inputMobile.value = location;
+            }
+          }
+        } catch(e) {
+          console.warn("Auto-geocode falhou:", e);
+        }
+      });
+
+      document.getElementById("radiusRange").addEventListener("input", (e) => {
+        const val = parseInt(e.target.value);
+        raioAtual = val;
+        document.getElementById("raioDisplay").innerText = val >= 1000 ? (val / 1000).toFixed(1) + "km" : val + "m";
+        if (circleRaio) circleRaio.setRadius(val);
+      });
+    }
+
+    function setRaio(r, btn) {
+      raioAtual = r;
+      document.querySelectorAll('.radius-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById("radiusRange").value = r;
+      document.getElementById("raioDisplay").innerText = r >= 1000 ? (r / 1000) + "km" : r + "m";
+      if (circleRaio) {
+        circleRaio.setRadius(r);
+        map.fitBounds(circleRaio.getBounds());
+      } else {
+        desenharCirculo(true);
       }
-    });
-    studiosLocais.forEach((loc, i) => {
-      const pos = new google.maps.LatLng(loc.lat, loc.lng);
-      if (google.maps.geometry.spherical.computeDistanceBetween(centroAtual, pos) <= raioAtual) {
-        createInteractiveMarker({ position: pos, title: loc.nome, obs: loc.obs }, 'pombais', `S${i+1}`);
-        count++;
+    }
+
+    function desenharCirculo(ajustarZoom = false) {
+      if (circleRaio) map.removeLayer(circleRaio);
+      circleRaio = L.circle([centroAtual.lat, centroAtual.lng], {
+        color: "#06b6d4", weight: 2, opacity: 0.8,
+        fillColor: "#06b6d4", fillOpacity: 0.15,
+        radius: raioAtual
+      }).addTo(map);
+
+      if (ajustarZoom) {
+        map.fitBounds(circleRaio.getBounds());
       }
-    });
+    }
 
-    const keywords = ['CDHU', 'Habitacional', 'Cohab', 'Minha Casa Minha Vida', 'Condomínio Residencial'];
-    let pending = keywords.length;
+    function atualizarPipMapa() {
+      const pip = document.getElementById("mapPip");
+      if (!pip) return;
 
-    keywords.forEach(kw => {
-      service.nearbySearch({ location: centroAtual, radius: raioAtual, keyword: kw }, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-          results.forEach(p => {
-            if (!foundIds.has(p.place_id) && google.maps.geometry.spherical.computeDistanceBetween(centroAtual, p.geometry.location) <= raioAtual) {
-              foundIds.add(p.place_id);
-              createInteractiveMarker(p, 'pombais', `D${count + 1}`);
+      const zoomLevel = raioAtual <= 500 ? 15 : 14;
+      const tileUrl = getTileUrl(centroAtual.lat, centroAtual.lng, zoomLevel);
+
+      pip.style.backgroundImage = `linear-gradient(rgba(15,23,42,0.6), rgba(15,23,42,0.8)), url('${tileUrl}')`;
+      pip.style.backgroundSize = 'cover';
+      pip.style.backgroundPosition = 'center';
+      pip.style.display = "block";
+      pip.classList.add("loading-pulse");
+
+      document.getElementById("pipSuper").innerText = supermercados.length;
+      document.getElementById("pipConc").innerText = (concorrentes || []).length;
+      document.getElementById("pipPop").innerText = document.getElementById("pombaisCount").innerText;
+    }
+
+    function adicionarEvolutionCard(step, title, value, extraClass = "") {
+      if (!centroAtual) return;
+
+      const zoomLevel = raioAtual <= 500 ? 15 : 14;
+      const staticMapUrl = getTileUrl(centroAtual.lat, centroAtual.lng, zoomLevel);
+
+      // Card HTML reutilizável
+      function makeCardHTML() {
+        return `
+        <div class="evolution-card ${extraClass}">
+          <div class="ev-step">${step}</div>
+          <div class="ev-title">${title}</div>
+          <div class="ev-value">${value}</div>
+          <div class="ev-print" style="background-image: url('${staticMapUrl}')"></div>
+        </div>`;
+      }
+
+      // Desktop: container flutuante no mapa
+      const desktopContainer = document.getElementById("evolutionCards");
+      if (desktopContainer) {
+        const card = document.createElement("div");
+        card.innerHTML = makeCardHTML();
+        desktopContainer.appendChild(card.firstElementChild);
+      }
+
+      // Mobile: container dentro da aba ANALISE
+      const mobileGrid = document.getElementById("stepsGrid");
+      if (mobileGrid) {
+        // Card mais compacto para o grid mobile
+        const mCard = document.createElement("div");
+        mCard.style.cssText = `background: rgba(255,255,255,0.04); border: 1px solid rgba(6,182,212,0.3); border-left: 3px solid var(--accent); border-radius: 14px; padding: 16px 14px;`;
+        mCard.innerHTML = `
+          <div style="font-size: 0.6rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">${step}</div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">${title}</div>
+          <div style="font-size: 1.2rem; font-weight: 900; color: #fff;">${value}</div>
+          <div style="width: 100%; height: 55px; background-image: url('${staticMapUrl}'); background-size: cover; background-position: center; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.08);"></div>
+        `;
+        mobileGrid.appendChild(mCard);
+      }
+    }
+
+    // Cache do nome da localização para evitar múltiplas chamadas ao Nominatim
+    let _cachedLocationName = null;
+    let _cachedLocationCoord = null;
+
+    async function getReverseGeoName(lat, lng) {
+      if (_cachedLocationCoord &&
+          Math.abs(_cachedLocationCoord.lat - lat) < 0.01 &&
+          Math.abs(_cachedLocationCoord.lng - lng) < 0.01) {
+        return _cachedLocationName;
+      }
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=12`,
+          { headers: { 'Accept-Language': 'pt-BR' } }
+        );
+        const data = await res.json();
+        const addr = data.address || {};
+        const partes = [
+          addr.suburb || addr.neighbourhood || addr.quarter,
+          addr.city || addr.town || addr.municipality,
+          addr.state_code || addr.state
+        ].filter(Boolean);
+        _cachedLocationName = partes.join(', ') || 'Brasil';
+        _cachedLocationCoord = { lat, lng };
+        console.log(`[GeoCache] Localização: "${_cachedLocationName}"`);
+        return _cachedLocationName;
+      } catch(e) {
+        return 'Brasil';
+      }
+    }
+
+    async function buscarEndereco() {
+      const end = document.getElementById("endereco").value;
+      if (!end) return;
+      const btnSearch = document.querySelector('.btn-search');
+      if (btnSearch) btnSearch.innerHTML = "⏳";
+      try {
+        // countrycodes=br garante que fica no Brasil
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&q=${encodeURIComponent(end)}`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const loc = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+          centroAtual = L.latLng(loc.lat, loc.lng);
+          map.setView([loc.lat, loc.lng], 15);
+          // Invalida cache de localização para o novo endereço
+          _cachedLocationName = null;
+          _cachedLocationCoord = null;
+          if (circleRaio) {
+            circleRaio.setLatLng(centroAtual);
+            map.fitBounds(circleRaio.getBounds());
+          } else {
+            desenharCirculo(true);
+          }
+          limparMapaCompleto(true);
+          // No desktop não muda de tab - executa pipeline direto
+          analisarTudoDesktop();
+        }
+      } catch (e) {
+        console.error("Erro ao buscar endereço:", e);
+      } finally {
+        if (btnSearch) btnSearch.innerHTML = "BUSCAR";
+      }
+    }
+
+    function renderMarkerLabel(name, rating, type, index = '') {
+      const icons = { 'concorrente': '🧺', 'mercado': '🛒', 'pombais': '🏢' };
+      const icon = icons[type] || '📍';
+      let cleanName = name.replace(/Lavanderia|Self-Service|Laundry|Express|Unidade|Supermercado|Conjunto|Habitacional|CDHU/gi, '').trim();
+      let prefix = type === 'concorrente' ? `C${index}-` : (type === 'mercado' ? `M${index}-` : `P${index}-`);
+      let displayName = (prefix + cleanName).substring(0, 15) + ` ${icon}${rating || ''}`;
+      return { text: displayName, color: "#0f172a", fontSize: "10px", fontWeight: "900", className: "map-card-label" };
+    }
+
+    function createInteractiveMarker(p, type, index = '') {
+      const icons = {
+        'mercado': 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        'concorrente': 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+        'pombais': 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png'
+      };
+      const pos = p.lat && p.lng ? [p.lat, p.lng] : (p.geometry ? [p.geometry.location.lat(), p.geometry.location.lng()] : [p.position.lat(), p.position.lng()]);
+      const name = p.name || p.title;
+
+      const marker = L.marker(pos, {
+        icon: L.icon({
+          iconUrl: icons[type],
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(map);
+
+      marker.bindPopup(`<div style="color:#000; padding:10px;"><b>${name}</b><br>${p.vicinity || p.obs || ''}</div>`);
+      marker.category = type;
+      todosMarcadores.push(marker);
+      return marker;
+    }
+
+    async function buscarPombais() {
+      if (circleRaio) map.fitBounds(circleRaio.getBounds());
+      const btn = (typeof event !== 'undefined' && event) ? event.currentTarget : null;
+      if (btn) btn.classList.add('loading-pulse');
+      document.getElementById("pombaisProgress").style.width = "50%";
+
+      const toast = document.getElementById("analysisToast");
+      const toastBody = document.getElementById("toastBody");
+      const toastProgress = document.getElementById("toastProgress");
+      const toastBar = document.getElementById("toastBar");
+
+      toast.style.display = "block"; toast.style.opacity = "1";
+      toastProgress.style.display = "block";
+      toastBar.style.width = "0%";
+      document.getElementById("toastPercent").innerText = "0%";
+
+      atualizarPipMapa();
+
+      typeWriter(toastBody, "Escaneando zonas de adensamento vertical. Localizando CDHUs e prédios populares...");
+      limparMarcadoresPorTipo('pombais');
+      toastBar.style.width = "40%";
+      document.getElementById("toastPercent").innerText = "40%";
+
+      let count = 0;
+
+      // Local Dataset Analysis
+      cdhuLocais.forEach((loc, i) => {
+        const dist = centroAtual.distanceTo(L.latLng(loc.lat, loc.lng));
+        if (dist <= raioAtual) {
+          createInteractiveMarker({ lat: loc.lat, lng: loc.lng, title: loc.nome, obs: loc.obs }, 'pombais', `B${i + 1}`);
+          count++;
+        }
+      });
+      studiosLocais.forEach((loc, i) => {
+        const dist = centroAtual.distanceTo(L.latLng(loc.lat, loc.lng));
+        if (dist <= raioAtual) {
+          createInteractiveMarker({ lat: loc.lat, lng: loc.lng, title: loc.nome, obs: loc.obs }, 'pombais', `S${i + 1}`);
+          count++;
+        }
+      });
+
+      // Overpass Fallback for real-world data
+      try {
+        const query = `[out:json][timeout:25];(node["building"~"apartments"](around:${raioAtual},${centroAtual.lat},${centroAtual.lng});way["building"~"apartments"](around:${raioAtual},${centroAtual.lat},${centroAtual.lng}););out body center;`;
+        const data = await fetchOverpassSafe(query);
+        if (data.elements) {
+          data.elements.slice(0, 15).forEach(el => {
+            const eLat = el.lat || (el.center ? el.center.lat : null);
+            const eLon = el.lon || (el.center ? el.center.lon : null);
+            if (eLat && eLon) {
+              const t = el.tags || {};
+              createInteractiveMarker({ lat: eLat, lng: eLon, title: t.name || "Edifício Residencial", vicinity: t["addr:street"] || "Detectado via Satélite" }, 'pombais', `D${count + 1}`);
               count++;
             }
           });
-          updateUI();
         }
-        pending--;
-        if (pending === 0) {
-          btn.classList.remove('loading-pulse');
-          passosStatus.pombais = true;
-          toastBar.style.width = "100%";
-          document.getElementById("toastPercent").innerText = "100%";
-          adicionarEvolutionCard("STEP 3", "Moradias Verticais", count + " Complexos");
-          document.getElementById("pombaisProgress").style.width = "100%";
-        }
-      });
-    });
-  }
-
-  function limparMarcadoresPorTipo(type) {
-    todosMarcadores = todosMarcadores.filter(m => {
-      if (m.category === type) {
-        m.setMap(null);
-        return false;
+      } catch (e) {
+        console.log("Falha Overpass Pombais. Tentando Nominatim...");
+        try {
+          const dataNom = await fetchNominatim("residencial", centroAtual.lat, centroAtual.lng, raioAtual);
+          if (dataNom && dataNom.length > 0) {
+            dataNom.slice(0, 15).forEach(el => {
+              createInteractiveMarker({ lat: parseFloat(el.lat), lng: parseFloat(el.lon), title: el.name || "Edifício Residencial", vicinity: (el.display_name || "").split(',')[0] || "Detectado via Nominatim" }, 'pombais', `D${count + 1}`);
+              count++;
+            });
+          }
+        } catch (eNom) { console.error("Erro Nominatim Pombais:", eNom); }
       }
-      return true;
-    });
-    if (type === 'mercado') supermercados = [];
-    if (type === 'concorrente') { concorrentes = []; }
-    if (type === 'pombais') { document.getElementById("pombaisCount").innerText = "0"; document.getElementById("pombaisProgress").style.width = "0%"; }
-  }
 
-  async function buscarSupermercados() {
-    if (circleRaio) map.fitBounds(circleRaio.getBounds());
-    const btn = event.currentTarget;
-    if (btn) btn.classList.add('loading-pulse');
-    document.getElementById("superProgress").style.width = "50%";
-    
-    const toast = document.getElementById("analysisToast");
-    const toastBody = document.getElementById("toastBody");
-    const toastProgress = document.getElementById("toastProgress");
-    const toastBar = document.getElementById("toastBar");
-    
-    toast.style.display = "block"; toast.style.opacity = "1";
-    toastProgress.style.display = "block";
-    toastBar.style.width = "0%";
-    document.getElementById("toastPercent").innerText = "0%";
-    
-    atualizarPipMapa();
-    
-    typeWriter(toastBody, "Rastreando âncoras comerciais. Identificando supermercados e minimercados para análise de sinergia de fluxo...");
-    limparMarcadoresPorTipo('mercado');
-    toastBar.style.width = "50%";
-    document.getElementById("toastPercent").innerText = "50%";
-    
-    let foundIds = new Set();
-    const types = ['grocery_or_supermarket', 'supermarket'];
-    const kws = ['supermercado', 'atacadão', 'minimercado', 'pão de açúcar', 'carrefour', 'extra'];
-
-    const searchPromises = [
-      ...types.map(t => new Promise(res => service.nearbySearch({ location: centroAtual, radius: raioAtual, type: t }, (r, s) => res(s === 'OK' ? r : [])))),
-      ...kws.map(k => new Promise(res => service.nearbySearch({ location: centroAtual, radius: raioAtual, keyword: k }, (r, s) => res(s === 'OK' ? r : []))))
-    ];
-
-    const resultsArray = await Promise.all(searchPromises);
-    resultsArray.flat().forEach(p => {
-      if (!foundIds.has(p.place_id) && google.maps.geometry.spherical.computeDistanceBetween(centroAtual, p.geometry.location) <= raioAtual) {
-        foundIds.add(p.place_id);
-        supermercados.push(p);
-        createInteractiveMarker(p, 'mercado', supermercados.length);
-      }
-    });
-
-    passosStatus.mercados = true;
-    updateUI();
-    toastBar.style.width = "100%";
-    document.getElementById("toastPercent").innerText = "100%";
-    if (btn) btn.classList.remove('loading-pulse');
-    document.getElementById("superProgress").style.width = "100%";
-    adicionarEvolutionCard("STEP 1", "Potencial de Mercado", supermercados.length + " Mercados");
-  }
-
-  async function buscarConcorrentes() {
-    if (circleRaio) map.fitBounds(circleRaio.getBounds());
-    const btn = event.currentTarget;
-    if (btn) btn.classList.add('loading-pulse');
-    document.getElementById("concProgress").style.width = "50%";
-    
-    const toast = document.getElementById("analysisToast");
-    const toastBody = document.getElementById("toastBody");
-    const toastProgress = document.getElementById("toastProgress");
-    const toastBar = document.getElementById("toastBar");
-    
-    toast.style.display = "block"; toast.style.opacity = "1";
-    toastProgress.style.display = "block";
-    toastBar.style.width = "0%";
-    document.getElementById("toastPercent").innerText = "0%";
-    
-    atualizarPipMapa();
-    
-    typeWriter(toastBody, "Mapeando ecossistema competitivo. Localizando lavanderias self-service e convencionais no raio de ação...");
-    limparMarcadoresPorTipo('concorrente');
-    toastBar.style.width = "50%";
-    document.getElementById("toastPercent").innerText = "50%";
-    
-    let foundIds = new Set();
-    const kws = ['lavanderia', 'laundromat', 'self-service laundry', 'lavanderia 60 minutos', 'lave e seque', 'omo lavanderia'];
-
-    const searchPromises = [
-      new Promise(res => service.nearbySearch({ location: centroAtual, radius: raioAtual, type: 'laundry' }, (r, s) => res(s === 'OK' ? r : []))),
-      ...kws.map(k => new Promise(res => service.nearbySearch({ location: centroAtual, radius: raioAtual, keyword: k }, (r, s) => res(s === 'OK' ? r : []))))
-    ];
-
-    const resultsArray = await Promise.all(searchPromises);
-    resultsArray.flat().forEach(p => {
-      if (!foundIds.has(p.place_id) && google.maps.geometry.spherical.computeDistanceBetween(centroAtual, p.geometry.location) <= raioAtual) {
-        foundIds.add(p.place_id);
-        concorrentes.push(p);
-        createInteractiveMarker(p, 'concorrente', concorrentes.length);
-      }
-    });
-
-    passosStatus.concorrentes = true;
-    updateUI();
-    toastBar.style.width = "100%";
-    document.getElementById("toastPercent").innerText = "100%";
-    if (btn) btn.classList.remove('loading-pulse');
-    document.getElementById("concProgress").style.width = "100%";
-    adicionarEvolutionCard("STEP 2", "Índice Concorrência", (concorrentes||[]).length + " Lavanderias");
-  }
-
-  let typewriterTimeout;
-  let autoCloseTimeout;
-  function typeWriter(element, text, i = 0, callback = null, skipBlur = false) {
-    if (i === 0) {
-      clearTimeout(typewriterTimeout);
-      clearTimeout(autoCloseTimeout);
-      element.innerHTML = '';
-      if (!skipBlur) document.querySelector('.map-mask').classList.add('map-analyzing');
-      // Pequeno delay para garantir limpeza do DOM
-      setTimeout(() => typeWriter(element, text, 1, callback), 50);
-      return;
+      btn.classList.remove('loading-pulse');
+      passosStatus.pombais = true;
+      toastBar.style.width = "100%";
+      document.getElementById("toastPercent").innerText = "100%";
+      adicionarEvolutionCard("STEP 3", "Moradias Verticais", count + " Complexos");
+      document.getElementById("pombaisProgress").style.width = "100%";
+      updateUI();
     }
-    if (i <= text.length) {
-      element.innerHTML = text.substring(0, i) + '<span class="cursor"></span>';
-      typewriterTimeout = setTimeout(() => typeWriter(element, text, i + 1, callback), 20);
-    } else {
-      element.innerHTML = text;
-      
-      // Se houver callback, executa e não fecha automaticamente
-      if (callback) {
-        callback();
+
+    function limparMarcadoresPorTipo(type) {
+      todosMarcadores = todosMarcadores.filter(m => {
+        if (m.category === type) {
+          map.removeLayer(m);
+          return false;
+        }
+        return true;
+      });
+      if (type === 'mercado') supermercados = [];
+      if (type === 'concorrente') { concorrentes = []; }
+      if (type === 'pombais') { document.getElementById("pombaisCount").innerText = "0"; document.getElementById("pombaisProgress").style.width = "0%"; }
+    }
+
+    async function buscarSupermercados() {
+      if (circleRaio) map.fitBounds(circleRaio.getBounds());
+
+      const btn = (typeof event !== 'undefined' && event) ? event.currentTarget : null;
+      if (btn && btn.classList) btn.classList.add('loading-pulse');
+      document.getElementById("superProgress").style.width = "20%";
+
+      const toast = document.getElementById("analysisToast");
+      const toastBody = document.getElementById("toastBody");
+      const toastProgress = document.getElementById("toastProgress");
+      const toastBar = document.getElementById("toastBar");
+      toast.style.display = "block"; toast.style.opacity = "1";
+      toastProgress.style.display = "block";
+      toastBar.style.width = "10%";
+      document.getElementById("toastPercent").innerText = "10%";
+
+      atualizarPipMapa();
+      analiseEmProgresso = true; // impede toast de fechar durante a análise
+      document.querySelector('.map-mask').classList.add('map-analyzing');
+      limparMarcadoresPorTipo('mercado');
+      supermercados = [];
+
+      const lat = centroAtual.lat, lng = centroAtual.lng;
+      const seen = new Map();
+
+      // --- FONTE 1: Apify LeadMagnet (1 run combinado para mercados) ---
+      if (APIFY_TOKEN) {
+        typeWriter(toastBody, "🔍 LeadMagnet: Buscando mercados e âncoras no Google Maps...");
+        toastBar.style.width = "20%";
+        // 1 run combinado = menos crédito + mais rápido
+        const polosGoogle = await fetchLeadMagnet('supermercado farmacia escola', lat, lng, raioAtual, 30);
+        toastBar.style.width = "80%";
+        document.getElementById("toastPercent").innerText = "80%";
+        polosGoogle.forEach(p => {
+          const k = `${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`;
+          if (!seen.has(k)) {
+            seen.set(k, p);
+            supermercados.push(p);
+            createInteractiveMarker(p, 'mercado', supermercados.length);
+          }
+        });
+        if (supermercados.length > 0) {
+          typeWriter(toastBody, `✅ Google Maps: ${supermercados.length} polos de fluxo detectados!`);
+        }
+      }
+
+      // --- FALLBACK: OSM Overpass ---
+      if (supermercados.length === 0) {
+        typeWriter(toastBody, "🗺️ OSM: Mapeando âncoras comerciais na região...");
+        try {
+          const polos = await fetchPolosMercado(lat, lng, raioAtual);
+          toastBar.style.width = "80%";
+          document.getElementById("toastPercent").innerText = "80%";
+          polos.forEach(p => {
+            const k = `${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`;
+            if (!seen.has(k)) {
+              seen.set(k, p);
+              supermercados.push(p);
+              createInteractiveMarker(p, 'mercado', supermercados.length);
+            }
+          });
+        } catch (e) {
+          console.error('Erro buscarSupermercados:', e);
+          typeWriter(toastBody, "⚠️ Erro de conexão. Tente novamente em instantes.");
+        }
+      }
+
+      passosStatus.mercados = true;
+      updateUI();
+      toastBar.style.width = "100%";
+      document.getElementById("toastPercent").innerText = "100%";
+      if (btn && btn.classList) btn.classList.remove('loading-pulse');
+      document.getElementById("superProgress").style.width = supermercados.length > 0 ? Math.min(supermercados.length * 8, 100) + "%" : "100%";
+      adicionarEvolutionCard("STEP 1", "Potencial de Mercado", supermercados.length + " Polos");
+      analiseEmProgresso = false;
+      fecharToast();
+    }
+
+    async function buscarConcorrentes() {
+      if (circleRaio) map.fitBounds(circleRaio.getBounds());
+      const btn = (typeof event !== 'undefined' && event) ? event.currentTarget : null;
+      if (btn) btn.classList.add('loading-pulse');
+      document.getElementById("concProgress").style.width = "20%";
+
+      const toast = document.getElementById("analysisToast");
+      const toastBody = document.getElementById("toastBody");
+      const toastProgress = document.getElementById("toastProgress");
+      const toastBar = document.getElementById("toastBar");
+      toast.style.display = "block"; toast.style.opacity = "1";
+      toastProgress.style.display = "block";
+      toastBar.style.width = "10%";
+      document.getElementById("toastPercent").innerText = "10%";
+
+      atualizarPipMapa();
+      analiseEmProgresso = true; // impede toast de fechar durante a análise
+      document.querySelector('.map-mask').classList.add('map-analyzing');
+      limparMarcadoresPorTipo('concorrente');
+      concorrentes = [];
+
+      const lat = centroAtual.lat;
+      const lng = centroAtual.lng;
+      const seen = new Map();
+
+      // --- FONTE 1: Apify LeadMagnet (1 run para lavanderias) ---
+      if (APIFY_TOKEN) {
+        typeWriter(toastBody, "🔍 LeadMagnet: Rastreando lavanderias no Google Maps...");
+        toastBar.style.width = "20%";
+        const concGoogle = await fetchLeadMagnet('lavanderia laundry', lat, lng, raioAtual, 40);
+        toastBar.style.width = "75%";
+        document.getElementById("toastPercent").innerText = "75%";
+        concGoogle.forEach(p => {
+          const k = `${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`;
+          if (!seen.has(k)) {
+            seen.set(k, p);
+            concorrentes.push(p);
+            createInteractiveMarker(p, 'concorrente', concorrentes.length);
+          }
+        });
+        if (concorrentes.length === 0) {
+          typeWriter(toastBody, "✅ Google Maps: Nenhuma lavanderia no raio. Oceano Azul!");
+        } else {
+          typeWriter(toastBody, `🎯 Google Maps: ${concorrentes.length} lavanderia(s) mapeada(s)!`);
+        }
+      }
+
+      // --- FALLBACK: OSM Overpass + Nominatim ---
+      if (concorrentes.length === 0) {
+        typeWriter(toastBody, "🗺️ OSM: Rastreando lavanderias via OpenStreetMap...");
+        try {
+          const encontradas = await fetchLavanderiasArea(lat, lng, raioAtual);
+          toastBar.style.width = "85%";
+          document.getElementById("toastPercent").innerText = "85%";
+          encontradas.forEach(p => {
+            const k = `${p.lat.toFixed(5)}_${p.lng.toFixed(5)}`;
+            if (!seen.has(k)) {
+              seen.set(k, p);
+              concorrentes.push(p);
+              createInteractiveMarker(p, 'concorrente', concorrentes.length);
+            }
+          });
+          if (concorrentes.length === 0) {
+            typeWriter(toastBody, "✅ Nenhuma lavanderia detectada no raio. Oportunidade de mercado!");
+          } else {
+            typeWriter(toastBody, `🎯 ${concorrentes.length} lavanderia(s) mapeada(s) no raio de ${raioAtual}m.`);
+          }
+        } catch (e) {
+          console.error("Erro buscarConcorrentes:", e);
+          typeWriter(toastBody, "⚠️ Falha ao rastrear concorrentes.");
+        }
+      }
+
+      passosStatus.concorrentes = true;
+      updateUI();
+      toastBar.style.width = "100%";
+      document.getElementById("toastPercent").innerText = "100%";
+      if (btn) btn.classList.remove('loading-pulse');
+      document.getElementById("concProgress").style.width = concorrentes.length > 0 ? Math.min(concorrentes.length * 15, 100) + "%" : "100%";
+      adicionarEvolutionCard("STEP 2", "Índice Concorrência", (concorrentes || []).length + " Lavanderias");
+      analiseEmProgresso = false;
+      fecharToast();
+    }
+
+    let typewriterTimeout;
+    let autoCloseTimeout;
+    // Flag global: impede o toast de fechar sozinho enquanto a análise roda
+    let analiseEmProgresso = false;
+
+    // Fecha o toast manualmente (chamado ao final da análise)
+    function fecharToast() {
+      const toast = document.getElementById("analysisToast");
+      const mask = document.querySelector('.map-mask');
+      if (!toast) return;
+      toast.classList.add('loading-pulse');
+      setTimeout(() => {
+        if (mask) mask.classList.remove('map-analyzing');
+        toast.classList.remove('loading-pulse');
+        toast.style.opacity = '0';
+        setTimeout(() => {
+          toast.style.display = 'none';
+          toast.style.opacity = '1';
+          toast.classList.remove("centered");
+          const tp = document.getElementById("toastProgress");
+          if (tp) tp.style.display = "none";
+        }, 800);
+      }, 1800);
+    }
+
+    function typeWriter(element, text, i = 0, callback = null, skipBlur = false) {
+      if (i === 0) {
+        clearTimeout(typewriterTimeout);
+        clearTimeout(autoCloseTimeout);
+        element.innerHTML = '';
+        if (!skipBlur) document.querySelector('.map-mask').classList.add('map-analyzing');
+        // Pequeno delay para garantir limpeza do DOM
+        setTimeout(() => typeWriter(element, text, 1, callback), 50);
+        return;
+      }
+      if (i <= text.length) {
+        element.innerHTML = text.substring(0, i) + '<span class="cursor"></span>';
+        typewriterTimeout = setTimeout(() => typeWriter(element, text, i + 1, callback), 20);
+      } else {
+        element.innerHTML = text;
+
+        // Se houver callback, executa e não fecha automaticamente
+        if (callback) {
+          callback();
+          return;
+        }
+
+        // Só fecha automaticamente se não houver análise em progresso
+        if (analiseEmProgresso) return;
+
+        const toast = document.getElementById("analysisToast");
+        const mask = document.querySelector('.map-mask');
+
+        if (toast) {
+          toast.classList.add('loading-pulse');
+          autoCloseTimeout = setTimeout(() => {
+            if (mask) mask.classList.remove('map-analyzing');
+            toast.classList.remove('loading-pulse');
+            toast.style.opacity = '0';
+            setTimeout(() => {
+              toast.style.display = 'none';
+              toast.style.opacity = '1';
+              toast.classList.remove("centered");
+              const tp = document.getElementById("toastProgress");
+              if (tp) tp.style.display = "none";
+            }, 800);
+          }, 2000);
+        }
+      }
+    }
+
+    async function analisarMercado() {
+      const btn = event.currentTarget;
+      btn.classList.add('loading-pulse');
+      document.getElementById("densidadeProgress").style.width = "50%";
+
+      // Toast Analysis Feedback
+      const toast = document.getElementById("analysisToast");
+      const toastBody = document.getElementById("toastBody");
+      const toastProgress = document.getElementById("toastProgress");
+      const toastBar = document.getElementById("toastBar");
+
+      toast.style.display = "block"; toast.style.opacity = "1";
+      toastProgress.style.display = "block";
+      toastBar.style.width = "0%";
+      document.getElementById("toastPercent").innerText = "0%";
+
+      atualizarPipMapa();
+
+      const statusMsg = `Varredura geoespacial iniciada (${raioAtual}m). Mapeando verticalização e densidade populacional no bairro detectado...`;
+      toastBody.innerHTML = statusMsg + '<span class="cursor"></span>';
+      document.querySelector('.map-mask').classList.add('map-analyzing');
+      toastBar.style.width = "40%";
+      document.getElementById("toastPercent").innerText = "40%";
+
+      try {
+        if (circleRaio) {
+          map.fitBounds(circleRaio.getBounds());
+        } else {
+          map.setZoom(17);
+        }
+
+        const data = await getAdensamentoData(centroAtual.lat, centroAtual.lng, raioAtual);
+        adensDataGlobal = data;
+        document.getElementById("densidadeValor").innerText = Math.round(data.perc) + "%";
+        document.getElementById("densidadeProgress").style.width = data.perc + "%";
+        document.getElementById("analiseCard").style.display = "block";
+        document.getElementById("btnDecisao").style.display = "flex";
+
+        toastBar.style.width = "100%";
+        document.getElementById("toastPercent").innerText = "100%";
+        passosStatus.adensamento = true;
+        adicionarEvolutionCard("STEP 4", "Adensamento Urbano", Math.round(data.perc) + "% Concentração");
+
+        const resumoFinal = `Análise de Área Concluída!\n\n• Mercado: ${supermercados.length} pontos detectados.\n• Concorrência: ${(concorrentes || []).length} unidades próximas.\n• Adensamento: ${Math.round(data.perc)}% de concentração.`;
+
+        typeWriter(toastBody, resumoFinal);
+
+      } catch (e) {
+        console.error("Erro no adensamento:", e);
+        const mask = document.querySelector('.map-mask');
+        if (mask) mask.classList.remove('map-analyzing');
+      } finally {
+        btn.classList.remove('loading-pulse');
+      }
+    }
+
+    async function fetchWorldPopData(lat, lng, radius) {
+      try {
+        const geojson = JSON.stringify({ type: "FeatureCollection", features: [{ type: "Feature", geometry: { type: "Polygon", coordinates: [[...Array(17).keys()].map(i => { const t = (i / 16) * 2 * Math.PI; return [lng + (radius * Math.cos(t) / (6378137 * Math.cos(lat * Math.PI / 180))) * (180 / Math.PI), lat + (radius * Math.sin(t) / 6378137) * (180 / Math.PI)]; })] } }] });
+        const r = await fetch(`https://api.worldpop.org/v1/services/stats?dataset=wpgppop&year=2020&runasync=false&geojson=${encodeURIComponent(geojson)}`);
+        const d = await r.json();
+        return d.data && d.data.total_population ? Math.round(d.data.total_population) : 0;
+      } catch (e) { return 0; }
+    }
+
+    async function gerarVeredito() {
+      if (!passosStatus.mercados || !passosStatus.concorrentes || !passosStatus.pombais || !passosStatus.adensamento) {
+        const toastBody = document.getElementById("toastBody");
+        const toast = document.getElementById("analysisToast");
+        toast.style.display = "block"; toast.style.opacity = "1";
+        typeWriter(toastBody, "⚠️ BLOQUEIO DE SEGURANÇA IA LAVAÍ: Você deve concluir todas as etapas de busca (Mercado, Concorrência, Moradias e Adensamento) antes de gerar o Veredito final.");
         return;
       }
 
+      const d = document.getElementById("detalhesAnalise");
+      d.style.display = "block";
+      d.innerHTML = `<div class="loading-pulse">🚀 IA LAVAÍ processando Inteligência Geográfica...</div>`;
+
+      // Efeito visual no card lateral
+      const cardIA = document.getElementById("analiseCard");
+      const iaBar = document.getElementById("iaProgress");
+      if (cardIA) cardIA.classList.add("loading-pulse");
+      if (iaBar) iaBar.style.width = "50%";
+
+      // Toast Inteligência IA LAVAÍ
       const toast = document.getElementById("analysisToast");
-      const mask = document.querySelector('.map-mask');
-      
-      // O blur agora permanece durante os 2s de espera (removido no setTimeout abaixo)
-      
-      if (toast) {
-        // Adiciona efeito de blink no card durante os 2s de espera final
-        toast.classList.add('loading-pulse');
-        
-        // Mantém o blur do mapa e o blink do card por 2 segundos antes de fechar
-        autoCloseTimeout = setTimeout(() => {
-          if (mask) mask.classList.remove('map-analyzing');
-          toast.classList.remove('loading-pulse');
-          toast.style.opacity = '0'; 
-          
-          setTimeout(() => { 
-            toast.style.display = 'none'; 
-            toast.style.opacity = '1'; 
-            toast.classList.remove("centered");
-            const tp = document.getElementById("toastProgress");
-            if(tp) tp.style.display = "none";
-          }, 800);
-        }, 2000);
-      }
-    }
-  }
-
-  async function analisarMercado() {
-    const btn = event.currentTarget;
-    btn.classList.add('loading-pulse');
-    document.getElementById("densidadeProgress").style.width = "50%";
-    
-    // Toast Analysis Feedback
-    const toast = document.getElementById("analysisToast");
-    const toastBody = document.getElementById("toastBody");
-    const toastProgress = document.getElementById("toastProgress");
-    const toastBar = document.getElementById("toastBar");
-    
-    toast.style.display = "block"; toast.style.opacity = "1";
-    toastProgress.style.display = "block";
-    toastBar.style.width = "0%";
-    document.getElementById("toastPercent").innerText = "0%";
-    
-    atualizarPipMapa();
-    
-    const statusMsg = `Varredura geoespacial iniciada (${raioAtual}m). Mapeando verticalização e densidade populacional no bairro detectado...`;
-    toastBody.innerHTML = statusMsg + '<span class="cursor"></span>';
-    document.querySelector('.map-mask').classList.add('map-analyzing');
-    toastBar.style.width = "40%";
-    document.getElementById("toastPercent").innerText = "40%";
-
-    try {
-      if (circleRaio) {
-        map.fitBounds(circleRaio.getBounds());
-      } else {
-        map.setZoom(17);
-      }
-
-      const data = await getAdensamentoData(centroAtual.lat(), centroAtual.lng(), raioAtual);
-      adensDataGlobal = data;
-      document.getElementById("densidadeValor").innerText = Math.round(data.perc) + "%";
-      document.getElementById("densidadeProgress").style.width = data.perc + "%";
-      document.getElementById("analiseCard").style.display = "block";
-      document.getElementById("btnDecisao").style.display = "flex";
-      
-      toastBar.style.width = "100%";
-      document.getElementById("toastPercent").innerText = "100%";
-      passosStatus.adensamento = true;
-      adicionarEvolutionCard("STEP 4", "Adensamento Urbano", Math.round(data.perc) + "% Concentração");
-
-      const resumoFinal = `Análise de Área Concluída!\n\n• Mercado: ${supermercados.length} pontos detectados.\n• Concorrência: ${(concorrentes||[]).length} unidades próximas.\n• Adensamento: ${Math.round(data.perc)}% de concentração.`;
-      
-      typeWriter(toastBody, resumoFinal);
-
-    } catch (e) {
-      console.error("Erro no adensamento:", e);
-      const mask = document.querySelector('.map-mask');
-      if (mask) mask.classList.remove('map-analyzing');
-    } finally {
-      btn.classList.remove('loading-pulse');
-    }
-  }
-
-  async function fetchWorldPopData(lat, lng, radius) {
-    try {
-      const geojson = JSON.stringify({ type: "FeatureCollection", features: [{ type: "Feature", geometry: { type: "Polygon", coordinates: [[...Array(17).keys()].map(i => { const t = (i/16)*2*Math.PI; return [lng+(radius*Math.cos(t)/(6378137*Math.cos(lat*Math.PI/180)))*(180/Math.PI), lat+(radius*Math.sin(t)/6378137)*(180/Math.PI)]; })] } }] });
-      const r = await fetch(`https://api.worldpop.org/v1/services/stats?dataset=wpgppop&year=2020&runasync=false&geojson=${encodeURIComponent(geojson)}`);
-      const d = await r.json();
-      return d.data && d.data.total_population ? Math.round(d.data.total_population) : 0;
-    } catch(e) { return 0; }
-  }
-
-  async function gerarVeredito() {
-    if (!passosStatus.mercados || !passosStatus.concorrentes || !passosStatus.pombais || !passosStatus.adensamento) {
       const toastBody = document.getElementById("toastBody");
-      const toast = document.getElementById("analysisToast");
+      const toastProgress = document.getElementById("toastProgress");
+      const toastBar = document.getElementById("toastBar");
+
       toast.style.display = "block"; toast.style.opacity = "1";
-      typeWriter(toastBody, "⚠️ BLOQUEIO DE SEGURANÇA IA LAVAÍ: Você deve concluir todas as etapas de busca (Mercado, Concorrência, Moradias e Adensamento) antes de gerar o Veredito final.");
-      return;
-    }
+      toast.classList.add("ai-processing", "loading-pulse");
+      toastProgress.style.display = "block";
+      toastBar.style.width = "0%";
+      document.getElementById("toastPercent").innerText = "0%";
 
-    const d = document.getElementById("detalhesAnalise");
-    d.style.display = "block";
-    d.innerHTML = `<div class="loading-pulse">🚀 IA LAVAÍ processando Inteligência Geográfica...</div>`;
-    
-    // Efeito visual no card lateral
-    const cardIA = document.getElementById("analiseCard");
-    const iaBar = document.getElementById("iaProgress");
-    if (cardIA) cardIA.classList.add("loading-pulse");
-    if (iaBar) iaBar.style.width = "50%";
-    
-    // Toast Inteligência IA LAVAÍ
-    const toast = document.getElementById("analysisToast");
-    const toastBody = document.getElementById("toastBody");
-    const toastProgress = document.getElementById("toastProgress");
-    const toastBar = document.getElementById("toastBar");
-    
-    toast.style.display = "block"; toast.style.opacity = "1";
-    toast.classList.add("ai-processing", "loading-pulse");
-    toastProgress.style.display = "block";
-    toastBar.style.width = "0%";
-    document.getElementById("toastPercent").innerText = "0%";
-    
-    // Configura o PiP do Mapa
-    atualizarPipMapa();
+      // Configura o PiP do Mapa
+      atualizarPipMapa();
 
-    // Remove blur do mapa imediatamente para análise IA
-    if (document.querySelector('.map-mask')) document.querySelector('.map-mask').classList.remove('map-analyzing');
+      // Remove blur do mapa imediatamente para análise IA
+      if (document.querySelector('.map-mask')) document.querySelector('.map-mask').classList.remove('map-analyzing');
 
-    // Inicia a Progressão de Leitura IA
-    const steps = [
-      "🛒 Cruzando Potencial de Mercado...",
-      "🏁 Verificando Índice de Concorrência...",
-      "🏢 Escaneando Moradias Verticais...",
-      "🏙️ Calculando Adensamento Urbano...",
-      "🧠 Processando Veredito LAVAÍ..."
-    ];
+      // Inicia a Progressão de Leitura IA
+      const steps = [
+        "🛒 Cruzando Potencial de Mercado...",
+        "🏁 Verificando Índice de Concorrência...",
+        "🏢 Escaneando Moradias Verticais...",
+        "🏙️ Calculando Adensamento Urbano...",
+        "🧠 Processando Veredito LAVAÍ..."
+      ];
 
-    let stepIdx = 0;
-    const interval = setInterval(() => {
-      if (stepIdx < steps.length) {
-        toastBody.innerHTML = `🚀 <span style="color:#fff">IA LAVAÍ</span> processando:<br><br><span style="font-size:1.1rem; color:#fff;">${steps[stepIdx]}</span>`;
-        const perc = (20 + (stepIdx * 15));
-        toastBar.style.width = perc + "%";
-        document.getElementById("toastPercent").innerText = perc + "%";
-        
-        if (stepIdx === steps.length - 1) {
+      let stepIdx = 0;
+      const interval = setInterval(() => {
+        if (stepIdx < steps.length) {
+          toastBody.innerHTML = `🚀 <span style="color:#fff">IA LAVAÍ</span> processando:<br><br><span style="font-size:1.1rem; color:#fff;">${steps[stepIdx]}</span>`;
+          const perc = (20 + (stepIdx * 15));
+          toastBar.style.width = perc + "%";
+          document.getElementById("toastPercent").innerText = perc + "%";
+
+          if (stepIdx === steps.length - 1) {
+            clearInterval(interval);
+            // Inicia contagem de 1 em 1 a partir de 80%
+            let currentPerc = 80;
+            const countInterval = setInterval(() => {
+              if (currentPerc < 100) {
+                currentPerc++;
+                toastBar.style.width = currentPerc + "%";
+                document.getElementById("toastPercent").innerText = currentPerc + "%";
+              } else {
+                clearInterval(countInterval);
+              }
+            }, 80); // Ajuste de velocidade para a contagem final
+          }
+          stepIdx++;
+        } else {
           clearInterval(interval);
-          // Inicia contagem de 1 em 1 a partir de 80%
-          let currentPerc = 80;
-          const countInterval = setInterval(() => {
-            if (currentPerc < 100) {
-              currentPerc++;
-              toastBar.style.width = currentPerc + "%";
-              document.getElementById("toastPercent").innerText = currentPerc + "%";
-            } else {
-              clearInterval(countInterval);
-            }
-          }, 80); // Ajuste de velocidade para a contagem final
         }
-        stepIdx++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 1200);
+      }, 1200);
 
-    try {
-      const lat = centroAtual.lat(), lng = centroAtual.lng();
-      toastBar.style.width = "30%";
-      document.getElementById("toastPercent").innerText = "30%";
-    
-    const pPop = fetchWorldPopData(lat, lng, raioAtual);
-    const pGen = new Promise(res => service.nearbySearch({ location: centroAtual, radius: raioAtual }, (r) => res(r||[])));
-    
-    // Busca dedicada de concorrentes para garantir dados frescos no veredito
-    const pConc = new Promise(res => {
-        service.nearbySearch({ location: centroAtual, radius: raioAtual, type: 'laundry' }, (r, s) => {
-            if (s === 'OK') {
-                // Sincroniza com o array global se estiver vazio
-                if (concorrentes.length === 0) {
-                    r.forEach(p => {
-                        concorrentes.push(p);
-                        createInteractiveMarker(p, 'concorrente', concorrentes.length);
-                    });
-                }
-                res(r);
-            } else res([]);
-        });
-    });
+      try {
+        const lat = centroAtual.lat, lng = centroAtual.lng;
+        toastBar.style.width = "30%";
+        document.getElementById("toastPercent").innerText = "30%";
 
-    const pBairro = new Promise(res => {
-      geocoder.geocode({ location: centroAtual }, (r) => {
-        if (r && r[0]) {
-          const b = r[0].address_components.find(c => c.types.includes("sublocality") || c.types.includes("neighborhood"));
-          res(b ? b.long_name.toLowerCase() : "");
-        } else res("");
-      });
-    });
-    
-    toastBar.style.width = "50%";
-    document.getElementById("toastPercent").innerText = "50%";
-    const [popRaw, genResults, bairroDetectado, concResults] = await Promise.all([pPop, pGen, pBairro, pConc]);
-    
-    // Unifica resultados de concorrência detectados
-    const totalConc = [...new Set([...concorrentes, ...concResults])];
-    
-    toastBar.style.width = "70%";
-    document.getElementById("toastPercent").innerText = "70%";
-    const adensData = adensDataGlobal || await getAdensamentoData(lat, lng, raioAtual);
-    adensDataGlobal = adensData;
-    
-    toastBar.style.width = "90%";
-    document.getElementById("toastPercent").innerText = "90%";
+        const pPop = fetchWorldPopData(lat, lng, raioAtual);
+        const pBairro = (async () => {
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${centroAtual.lat}&lon=${centroAtual.lng}`);
+            const data = await res.json();
+            if (data && data.address) {
+              return data.address.suburb || data.address.neighbourhood || "";
+            }
+          } catch (e) { }
+          return "";
+        })();
 
-    const comercialCount = genResults.filter(r => r.types && (r.types.includes('store') || r.types.includes('restaurant') || r.types.includes('shopping_mall'))).length;
-    const isPremium = genResults.some(r => ["studio", "gourmet", "café", "boutique", "fitness", "crossfit", "pet shop luxury", "spa"].some(kw => r.name.toLowerCase().includes(kw)));
-    
-    let classe = "C1/C2"; 
-    const endStr = (document.getElementById("endereco").value || "").toLowerCase();
-    if (eliteSP.some(e => endStr.includes(e) || (bairroDetectado && bairroDetectado.includes(e)))) classe = isPremium ? "A1/A2" : "B1/B2";
-    else if (popularSP.some(p => endStr.includes(p) || (bairroDetectado && bairroDetectado.includes(p)))) classe = "D/E";
+        toastBar.style.width = "50%";
+        document.getElementById("toastPercent").innerText = "50%";
+        const [popRaw, bairroDetectado] = await Promise.all([pPop, pBairro]);
+        const genResults = []; // Overpass simplified for now
 
-    const areaKm2 = Math.PI * Math.pow(raioAtual / 1000, 2);
-    let densidadePorKm2 = 12000; 
-    if (adensDataGlobal.vertical === "ALTO") densidadePorKm2 = 32000;
-    else if (adensDataGlobal.vertical === "MÉDIO") densidadePorKm2 = 22000;
-    
-    if (classe.includes("C") || classe.includes("D")) densidadePorKm2 *= 1.25;
-    if (classe.includes("A")) densidadePorKm2 *= 0.7;
+        // Unifica resultados de concorrência detectados
+        const totalConc = [...concorrentes];
 
-    let popEstimada = Math.round(areaKm2 * densidadePorKm2 * (adensDataGlobal.perc / 100));
-    let pop = Math.max(popRaw, popEstimada);
-    if (adensDataGlobal.vertical === "ALTO" && pop < 15000) pop = Math.round(15000 * areaKm2 * 4);
+        toastBar.style.width = "70%";
+        document.getElementById("toastPercent").innerText = "70%";
+        const adensData = adensDataGlobal || await getAdensamentoData(lat, lng, raioAtual);
+        adensDataGlobal = adensData;
 
-    let selfServices = [], convencionais = [];
-    totalConc.forEach(c => {
-      const name = (c.name || "").toLowerCase();
-      if (selfServiceKeywords.some(kw => name.includes(kw))) selfServices.push(c);
-      else convencionais.push(c);
-    });
+        toastBar.style.width = "90%";
+        document.getElementById("toastPercent").innerText = "90%";
 
-    const densidadeHab = Math.round(pop / areaKm2);
-    let sDemografico = 0, sSocio = 0, sConcorrencia = 0, sEstrategico = 0;
-    let pros = [], contras = [], argumentos = [];
+        const comercialCount = genResults.filter(r => r.types && (r.types.includes('store') || r.types.includes('restaurant') || r.types.includes('shopping_mall'))).length;
+        const isPremium = genResults.some(r => ["studio", "gourmet", "café", "boutique", "fitness", "crossfit", "pet shop luxury", "spa"].some(kw => r.name.toLowerCase().includes(kw)));
 
-    if (densidadeHab >= 22000) { 
-      sDemografico = 40; 
-      pros.push("Massa Crítica: Densidade extrema garante volume operacional."); 
-      argumentos.push(`A região com ${densidadeHab.toLocaleString()} hab/km² supera a média, reduzindo o CAC.`);
-    } else if (densidadeHab >= 12000) { 
-      sDemografico = 30; 
-      pros.push("Fluxo Estável: Densidade compatível com o modelo."); 
-      argumentos.push(`Volume populacional de ${pop.toLocaleString()} habitantes adequado para operação padrão.`);
-    } else { 
-      sDemografico = 15; 
-      contras.push("Baixa Capilaridade: População dispersa no raio selecionado."); 
-      argumentos.push("O baixo adensamento exigirá investimentos em marketing digital para raio de alcance maior.");
-    }
-    
-    if (adensDataGlobal.vertical === "ALTO" && (classe.includes("C") || classe.includes("D"))) {
-      sEstrategico += 15;
-      pros.push("Perfil 'Pombo-Correio': Prédios populares com lavanderias coletivas insuficientes.");
-      argumentos.push("Imóveis compactos nesta área possuem déficit de espaço para secagem, tornando o self-service uma necessidade.");
-    } else if (classe.includes("A") || classe.includes("B")) {
-      sSocio = 15;
-      contras.push("Barreira Cultural: Preferência por serviços de lavanderia com passadoria.");
-      argumentos.push("Público de alta renda delega a tarefa; o foco aqui deve ser itens volumosos (edredons).");
-    } else {
-      sSocio = 30;
-      pros.push("Fit de Mercado: Público C1/C2 busca economia e rapidez.");
-    }
+        let classe = "C1/C2";
+        const endStr = (document.getElementById("endereco").value || "").toLowerCase();
+        if (eliteSP.some(e => endStr.includes(e) || (bairroDetectado && bairroDetectado.includes(e)))) classe = isPremium ? "A1/A2" : "B1/B2";
+        else if (popularSP.some(p => endStr.includes(p) || (bairroDetectado && bairroDetectado.includes(p)))) classe = "D/E";
 
-    const oppIndex = Math.round(pop / (selfServices.length + 1));
-    
-    // LOGICA DE CONCORRENCIA REFINADA
-    if (raioAtual <= 500 && selfServices.length > 3) {
-      sConcorrencia = -10;
-      contras.push("Saturação Local Crítica: Alta densidade de autosserviço (3+) no raio de 500m.");
-      argumentos.push(`Risco de Canibalização: Com ${selfServices.length} unidades de autosserviço próximas, o payback pode ser estendido.`);
-    } else if (selfServices.length === 0) {
-      sConcorrencia = 30;
-      pros.push("First Mover Advantage: Ausência de concorrência de autosserviço.");
-      argumentos.push(`Oceano Azul: O índice de ${oppIndex.toLocaleString()} usuários por unidade é extremamente favorável.`);
-    } else {
-      sConcorrencia = 15;
-      pros.push("Mercado Validado: Competidores de autosserviço provam a demanda.");
-    }
+        const areaKm2 = Math.PI * Math.pow(raioAtual / 1000, 2);
+        let densidadePorKm2 = 12000;
+        if (adensDataGlobal.vertical === "ALTO") densidadePorKm2 = 32000;
+        else if (adensDataGlobal.vertical === "MÉDIO") densidadePorKm2 = 22000;
 
-    if (convencionais.length > 0) {
-      sConcorrencia += 10;
-      pros.push("Brecha de Eficiência: Lavanderias convencionais presentes.");
-      argumentos.push(`Existem ${convencionais.length} lavanderias convencionais na área; o modelo LAVAÍ é superior em custo-benefício e tempo.`);
-    }
+        if (classe.includes("C") || classe.includes("D")) densidadePorKm2 *= 1.25;
+        if (classe.includes("A")) densidadePorKm2 *= 0.7;
 
-    if (comercialCount > 15) {
-      sEstrategico += 10;
-      pros.push("Sinergia de Varejo: Forte presença de comércio local.");
-      argumentos.push("A alta contagem de vizinhança gera tráfego espontâneo de pedestres.");
-    }
+        let popEstimada = Math.round(areaKm2 * densidadePorKm2 * (adensDataGlobal.perc / 100));
+        let pop = Math.max(popRaw, popEstimada);
+        if (adensDataGlobal.vertical === "ALTO" && pop < 15000) pop = Math.round(15000 * areaKm2 * 4);
 
-    // --- PONTOS DE ATENÇÃO ---
-    contras.push("Visibilidade de Fachada: Público de proximidade exige unidade impossível de não ser vista.");
-    contras.push("Fluxo Orgânico: O ponto deve estar na rota natural de retorno do trabalho.");
+        const numConc = totalConc.length;
 
-    let pontuacao = sDemografico + sSocio + sConcorrencia + sEstrategico;
-    pontuacao = Math.max(5, Math.min(100, Math.round(pontuacao)));
+        const densidadeHab = Math.round(pop / areaKm2);
+        let sDemografico = 0, sSocio = 0, sConcorrencia = 0, sEstrategico = 0;
+        let pros = [], contras = [], argumentos = [];
 
-    let cor = "#ef4444", vereditoTexto = "ANÁLISE CRÍTICA", recomendacao = "", callToAction = "";
-    if (pontuacao >= 85) { 
-      cor = "#22c55e"; vereditoTexto = "INVESTIMENTO PRIORITÁRIO"; 
-      recomendacao = "Localização estratégica de alto rendimento. O volume de público local e a verticalização sugerem um payback acelerado.";
-      callToAction = "Encaminhar imediatamente para o time comercial para prospecção ativa.";
-    } else if (pontuacao >= 70) { 
-      cor = "#22c55e"; vereditoTexto = "OPORTUNIDADE VIÁVEL"; 
-      recomendacao = "Ponto comercial com fundamentos sólidos. A densidade local justifica a abertura com foco em conveniência.";
-      callToAction = "Liberado para abordagem comercial e análise de contrato.";
-    } else if (pontuacao >= 50) { 
-      cor = "#eab308"; vereditoTexto = "ESTUDO DE PONTO NECESSÁRIO"; 
-      recomendacao = "A viabilidade depende da negociação agressiva do aluguel. O ponto deve estar na rota de fluxo principal.";
-      callToAction = "Aguardar validação de campo antes da prospecção.";
-    } else {
-      cor = "#ef4444"; vereditoTexto = "RISCO ELEVADO";
-      recomendacao = "Fundamentos demográficos insuficientes para o modelo padrão. Buscar micro-regiões adjacentes.";
-      callToAction = "Análise reprovada para este endereço.";
-    }
+        if (densidadeHab >= 22000) {
+          sDemografico = 40;
+          pros.push("Massa Crítica: Densidade extrema garante volume operacional.");
+          argumentos.push(`A região com ${densidadeHab.toLocaleString()} hab/km² supera a média, reduzindo o CAC.`);
+        } else if (densidadeHab >= 12000) {
+          sDemografico = 30;
+          pros.push("Fluxo Estável: Densidade compatível com o modelo.");
+          argumentos.push(`Volume populacional de ${pop.toLocaleString()} habitantes adequado para operação padrão.`);
+        } else {
+          sDemografico = 15;
+          contras.push("Baixa Capilaridade: População dispersa no raio selecionado.");
+          argumentos.push("O baixo adensamento exigirá investimentos em marketing digital para raio de alcance maior.");
+        }
 
-    analiseGlobal = { pop, classe, selfServices, convencionais, pontuacao, vereditoTexto, recomendacao, callToAction, pros, contras, argumentos, cor, densidadeHab, endereco: document.getElementById("endereco").value, oppIndex };
-    
-    document.getElementById("modalBody").innerHTML = `
+        if (adensDataGlobal.vertical === "ALTO" && (classe.includes("C") || classe.includes("D"))) {
+          sEstrategico += 15;
+          pros.push("Perfil 'Pombo-Correio': Prédios populares com lavanderias coletivas insuficientes.");
+          argumentos.push("Imóveis compactos nesta área possuem déficit de espaço para secagem, tornando o self-service uma necessidade.");
+        } else if (classe.includes("A") || classe.includes("B")) {
+          sSocio = 15;
+          contras.push("Barreira Cultural: Preferência por serviços de lavanderia com passadoria.");
+          argumentos.push("Público de alta renda delega a tarefa; o foco aqui deve ser itens volumosos (edredons).");
+        } else {
+          sSocio = 30;
+          pros.push("Fit de Mercado: Público C1/C2 busca economia e rapidez.");
+        }
+
+        const oppIndex = Math.round(pop / (numConc + 1));
+
+        // LOGICA DE CONCORRENCIA REFINADA
+        if (raioAtual <= 500 && numConc > 3) {
+          sConcorrencia = -10;
+          contras.push("Saturação Local Crítica: Alta densidade de concorrentes (3+) no raio de 500m.");
+          argumentos.push(`Risco de Canibalização: Com ${numConc} lavanderias próximas, o payback pode ser estendido.`);
+        } else if (numConc === 0) {
+          sConcorrencia = 30;
+          pros.push("First Mover Advantage: Ausência de concorrentes na região.");
+          argumentos.push(`Oceano Azul: Com forte adensamento de ${Math.round(adensDataGlobal.perc)}%, a ausência de concorrentes é extremamente favorável.`);
+        } else {
+          sConcorrencia = 15;
+          pros.push("Mercado Validado: Presença de concorrentes prova a demanda.");
+          argumentos.push(`Adoção Validada: A presença de ${numConc} lavanderia(s) confirma a cultura de uso local sem saturar a praça.`);
+        }
+
+        if (comercialCount > 15) {
+          sEstrategico += 10;
+          pros.push("Sinergia de Varejo: Forte presença de comércio local.");
+          argumentos.push("A alta contagem de vizinhança gera tráfego espontâneo de pedestres.");
+        }
+
+        // --- PONTOS DE ATENÇÃO ---
+        contras.push("Visibilidade de Fachada: Público de proximidade exige unidade impossível de não ser vista.");
+        contras.push("Fluxo Orgânico: O ponto deve estar na rota natural de retorno do trabalho.");
+
+        let pontuacao = sDemografico + sSocio + sConcorrencia + sEstrategico;
+        pontuacao = Math.max(5, Math.min(100, Math.round(pontuacao)));
+
+        let cor = "#ef4444", vereditoTexto = "ANÁLISE CRÍTICA", recomendacao = "", callToAction = "";
+        if (pontuacao >= 85) {
+          cor = "#22c55e"; vereditoTexto = "INVESTIMENTO PRIORITÁRIO";
+          recomendacao = "Localização estratégica de alto rendimento. O volume de público local e a verticalização sugerem um payback acelerado.";
+          callToAction = "Encaminhar imediatamente para o time comercial para prospecção ativa.";
+        } else if (pontuacao >= 70) {
+          cor = "#22c55e"; vereditoTexto = "OPORTUNIDADE VIÁVEL";
+          recomendacao = "Ponto comercial com fundamentos sólidos. A densidade local justifica a abertura com foco em conveniência.";
+          callToAction = "Liberado para abordagem comercial e análise de contrato.";
+        } else if (pontuacao >= 50) {
+          cor = "#eab308"; vereditoTexto = "ESTUDO DE PONTO NECESSÁRIO";
+          recomendacao = "A viabilidade depende da negociação agressiva do aluguel. O ponto deve estar na rota de fluxo principal.";
+          callToAction = "Aguardar validação de campo antes da prospecção.";
+        } else {
+          cor = "#ef4444"; vereditoTexto = "RISCO ELEVADO";
+          recomendacao = "Fundamentos demográficos insuficientes para o modelo padrão. Buscar micro-regiões adjacentes.";
+          callToAction = "Análise reprovada para este endereço.";
+        }
+
+        analiseGlobal = { pop, classe, totalConc, pontuacao, vereditoTexto, recomendacao, callToAction, pros, contras, argumentos, cor, densidadeHab, endereco: document.getElementById("endereco").value, oppIndex };
+
+        document.getElementById("modalBody").innerHTML = `
       <div id="reportContainer" style="color: #ffffff; font-family: 'Outfit', sans-serif; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(20px); padding: 50px; border-radius: 32px; border: 1px solid rgba(255,255,255,0.1); width: 95%; max-width: 950px; margin: 0 auto; box-shadow: 0 50px 100px rgba(0,0,0,0.5);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 25px;">
           <div>
@@ -1527,14 +2791,23 @@
           <div class="score-circle" style="border-color: ${cor}; color: ${cor}; width: 80px; height: 80px; border-radius: 50%; border: 6px solid ${cor}; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800;">${pontuacao}</div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+        <div id="printMiniMapContainer" style="width: 100%; height: 220px; border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; position: relative; display: block; z-index: 10;">
+           <div id="printMiniMap" style="width: 100%; height: 100%;"></div>
+           <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 4px 10px; border-radius: 20px; font-size: 0.65rem; color: #06b6d4; z-index: 1000; font-weight: 700;">ÁREA DE INFLUÊNCIA: ${raioAtual}m</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px;">
           <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
             <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Habitantes</span>
             <div style="font-size: 1.1rem; margin-top: 5px; color: #fff; font-weight: 700;">${pop.toLocaleString()}</div>
           </div>
           <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
             <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Oportunidade</span>
-            <div style="font-size: 1.1rem; margin-top: 5px; color: var(--success); font-weight: 700;">${oppIndex.toLocaleString()} / Unid</div>
+            <div style="font-size: 1.1rem; margin-top: 5px; color: var(--success); font-weight: 700;">${Math.round(adensDataGlobal.perc)}% Adensamento</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Concorrência</span>
+            <div style="font-size: 1.1rem; margin-top: 5px; color: #ef4444; font-weight: 700;">${numConc} Detectada(s)</div>
           </div>
           <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
             <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Perfil</span>
@@ -1584,187 +2857,225 @@
         </div>
       </div>
     `;
-    // Fechar Toast de Inteligência Imediatamente
-    toast.style.display = 'none'; 
-    document.getElementById("mapPip").style.display = 'none';
-    toast.classList.remove("ai-processing", "loading-pulse");
-    
-    // Finalizar progresso no card lateral
-    const cardIA = document.getElementById("analiseCard");
-    const iaBar = document.getElementById("iaProgress");
-    if (cardIA) cardIA.classList.remove("loading-pulse");
-    if (iaBar) iaBar.style.width = "100%";
-    
-    toastProgress.style.display = "none";
-    toastBar.style.width = "0%";
-    document.getElementById("toastPercent").innerText = "0%";
-    if (document.querySelector('.map-mask')) document.querySelector('.map-mask').classList.remove('map-analyzing');
+        // Fechar Toast de Inteligência Imediatamente
+        toast.style.display = 'none';
+        document.getElementById("mapPip").style.display = 'none';
+        toast.classList.remove("ai-processing", "loading-pulse");
 
-    document.getElementById("vereditoModal").style.display = "flex";
-    d.innerHTML = `✅ Análise concluída! Score: ${pontuacao}%`;
-    showSidebar();
+        // Finalizar progresso no card lateral
+        const cardIA = document.getElementById("analiseCard");
+        const iaBar = document.getElementById("iaProgress");
+        if (cardIA) cardIA.classList.remove("loading-pulse");
+        if (iaBar) iaBar.style.width = "100%";
 
-    } catch (err) {
-      console.error("Veredito Error:", err);
-      if (document.querySelector('.map-mask')) document.querySelector('.map-mask').classList.remove('map-analyzing');
+        toastProgress.style.display = "none";
+        toastBar.style.width = "0%";
+        document.getElementById("toastPercent").innerText = "0%";
+        if (document.querySelector('.map-mask')) document.querySelector('.map-mask').classList.remove('map-analyzing');
+
+        document.getElementById("vereditoModal").style.display = "flex";
+
+        // Iniciar Mini Mapa de Print do Relatório
+        setTimeout(() => {
+          if (window.miniMapInst) {
+            window.miniMapInst.remove();
+          }
+          const printMap = L.map('printMiniMap', {
+            center: [centroAtual.lat, centroAtual.lng],
+            zoom: raioAtual <= 500 ? 15 : 14,
+            zoomControl: false,
+            attributionControl: false,
+            dragging: false,
+            touchZoom: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false
+          });
+          window.miniMapInst = printMap;
+
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 20
+          }).addTo(printMap);
+
+          L.circle([centroAtual.lat, centroAtual.lng], {
+            color: "#06b6d4", weight: 3, opacity: 0.8,
+            fillColor: "#06b6d4", fillOpacity: 0.2,
+            radius: raioAtual
+          }).addTo(printMap);
+
+          const centerIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#0f172a; width:16px; height:16px; border-radius:50%; border:3px solid #06b6d4; box-shadow: 0 0 10px rgba(0,0,0,0.5);'></div>",
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          });
+          L.marker([centroAtual.lat, centroAtual.lng], { icon: centerIcon }).addTo(printMap);
+        }, 400);
+        d.innerHTML = `✅ Análise concluída! Score: ${pontuacao}%`;
+        showSidebar();
+
+      } catch (err) {
+        console.error("Veredito Error:", err);
+        if (document.querySelector('.map-mask')) document.querySelector('.map-mask').classList.remove('map-analyzing');
+      }
     }
-  }
 
-  function updateUI() {
-    // Step 1: Mercados
-    const mercCount = supermercados.length;
-    document.getElementById("superCount").innerText = mercCount;
-    document.getElementById("pipSuper").innerText = mercCount;
+    function updateUI() {
+      // Step 1: Mercados
+      const mercCount = supermercados.length;
+      document.getElementById("superCount").innerText = mercCount;
+      document.getElementById("pipSuper").innerText = mercCount;
 
-    // Step 2: Concorrentes
-    const concLen = (concorrentes || []).length;
-    document.getElementById("concCount").innerText = concLen;
-    document.getElementById("pipConc").innerText = concLen;
+      // Step 2: Concorrentes
+      const concLen = (concorrentes || []).length;
+      document.getElementById("concCount").innerText = concLen;
+      document.getElementById("pipConc").innerText = concLen;
 
-    // Step 3: Moradias
-    const countPombais = todosMarcadores.filter(m => m.category === 'pombais').length;
-    document.getElementById("pombaisCount").innerText = countPombais;
-    document.getElementById("pipPop").innerText = countPombais;
+      // Step 3: Moradias
+      const countPombais = todosMarcadores.filter(m => m.category === 'pombais').length;
+      document.getElementById("pombaisCount").innerText = countPombais;
+      document.getElementById("pipPop").innerText = countPombais;
 
-    // Step 4: Adensamento
-    if (adensDataGlobal) {
-      document.getElementById("densidadeValor").innerText = Math.round(adensDataGlobal.perc) + "%";
+      // Step 4: Adensamento
+      if (adensDataGlobal) {
+        document.getElementById("densidadeValor").innerText = Math.round(adensDataGlobal.perc) + "%";
+      }
     }
-  }
 
-  function limparMapaCompleto(manterInput = false) {
-    // Limpar Marcadores e Geometrias
-    todosMarcadores.forEach(m => m.setMap(null));
-    todosMarcadores = [];
-    // Círculo de raio agora é persistente e não é removido ao limpar dados
-    if (circleRaio) {
-      circleRaio.setCenter(centroAtual);
-      circleRaio.setRadius(raioAtual);
-    } else {
-      desenharCirculo();
+    function limparMapaCompleto(manterInput = false) {
+      todosMarcadores.forEach(m => map.removeLayer(m));
+      todosMarcadores = [];
+      if (circleRaio) {
+        circleRaio.setLatLng(centroAtual);
+        circleRaio.setRadius(raioAtual);
+      } else {
+        desenharCirculo();
+      }
+
+      // Resetar Dados Globais
+      supermercados = [];
+      concorrentes = [];
+      adensDataGlobal = null;
+      analiseGlobal = null;
+      passosStatus = { mercados: false, concorrentes: false, pombais: false, adensamento: false };
+
+      // Resetar Inputs e UI
+      if (!manterInput) {
+        document.getElementById("endereco").value = "";
+        if (document.getElementById("enderecoMobile")) document.getElementById("enderecoMobile").value = "";
+      }
+      document.getElementById("evolutionCards").innerHTML = "";
+      if (document.getElementById("stepsGrid")) document.getElementById("stepsGrid").innerHTML = "";
+      document.getElementById("analiseCard").style.display = "none";
+      document.getElementById("btnDecisao").style.display = "none";
+      document.getElementById("classeNome").innerText = "Aguardando...";
+      document.getElementById("perfilUrbano").innerText = "";
+      document.getElementById("populacaoEstimada").innerText = "";
+      document.getElementById("detalhesAnalise").style.display = "none";
+      document.getElementById("detalhesAnalise").innerHTML = "Aguardando...";
+      document.getElementById("analysisToast").style.display = "none";
+      document.getElementById("mapPip").style.display = "none";
+      document.getElementById("iaProgress").style.width = "0%";
+
+      // Resetar Contadores e Barras de Progresso
+      document.getElementById("pombaisCount").innerText = "0";
+      document.getElementById("pombaisProgress").style.width = "0%";
+      document.getElementById("densidadeValor").innerText = "0%";
+      document.getElementById("densidadeProgress").style.width = "0%";
+      document.getElementById("superCount").innerText = "0";
+      document.getElementById("superProgress").style.width = "0%";
+      document.getElementById("concCount").innerText = "0";
+      document.getElementById("concProgress").style.width = "0%";
+
+      // Resetar PiP
+      document.getElementById("pipSuper").innerText = "0";
+      document.getElementById("pipConc").innerText = "0";
+      document.getElementById("pipPop").innerText = "0";
+
+      // Remover Máscara de Blur
+      if (document.querySelector('.map-mask')) {
+        document.querySelector('.map-mask').classList.remove('map-analyzing');
+      }
+
+      // Remover classes de processamento do toast
+      document.getElementById("analysisToast").classList.remove("ai-processing", "loading-pulse");
+
+      updateUI();
     }
-    
-    // Resetar Dados Globais
-    supermercados = []; 
-    concorrentes = []; 
-    adensDataGlobal = null;
-    analiseGlobal = null;
-    passosStatus = { mercados: false, concorrentes: false, pombais: false, adensamento: false };
-    
-    // Resetar Inputs e UI
-    if (!manterInput) {
-      document.getElementById("endereco").value = "";
-      if (document.getElementById("enderecoMobile")) document.getElementById("enderecoMobile").value = "";
+
+    function exportarPDF() {
+      if (!analiseGlobal) return alert("Gere a análise primeiro!");
+      const element = document.getElementById("reportContainer");
+      const pdfHide = document.getElementById("pdfHide");
+
+      pdfHide.style.display = "none";
+
+      const opt = {
+        margin: [10, 10],
+        filename: `Relatorio_Lavai_${analiseGlobal.pontuacao}%.pdf`,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 3, backgroundColor: '#161A23', useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        pdfHide.style.display = "flex";
+      });
     }
-    document.getElementById("evolutionCards").innerHTML = "";
-    if (document.getElementById("mobile-steps-container")) document.getElementById("mobile-steps-container").innerHTML = "";
-    document.getElementById("analiseCard").style.display = "none";
-    document.getElementById("btnDecisao").style.display = "none";
-    document.getElementById("classeNome").innerText = "Aguardando...";
-    document.getElementById("perfilUrbano").innerText = "";
-    document.getElementById("populacaoEstimada").innerText = "";
-    document.getElementById("detalhesAnalise").style.display = "none";
-    document.getElementById("detalhesAnalise").innerHTML = "Aguardando...";
-    document.getElementById("analysisToast").style.display = "none";
-    document.getElementById("mapPip").style.display = "none";
-    document.getElementById("iaProgress").style.width = "0%";
-    
-    // Resetar Contadores e Barras de Progresso
-    document.getElementById("pombaisCount").innerText = "0";
-    document.getElementById("pombaisProgress").style.width = "0%";
-    document.getElementById("densidadeValor").innerText = "0%";
-    document.getElementById("densidadeProgress").style.width = "0%";
-    document.getElementById("superCount").innerText = "0";
-    document.getElementById("superProgress").style.width = "0%";
-    document.getElementById("concCount").innerText = "0";
-    document.getElementById("concProgress").style.width = "0%";
-    
-    // Resetar PiP
-    document.getElementById("pipSuper").innerText = "0";
-    document.getElementById("pipConc").innerText = "0";
-    document.getElementById("pipPop").innerText = "0";
-    
-    // Remover Máscara de Blur
-    if (document.querySelector('.map-mask')) {
-      document.querySelector('.map-mask').classList.remove('map-analyzing');
+
+    function exportarRelatorioCompleto() {
+      if (!analiseGlobal) return alert("Gere a análise primeiro!");
+
+      const resumo = [
+        ["INTELIGÊNCIA DE EXPANSÃO LAVAÍ", ""],
+        ["Endereço", analiseGlobal.endereco],
+        ["Score Final", analiseGlobal.pontuacao + "%"],
+        ["Veredito", analiseGlobal.vereditoTexto],
+        ["População Estimada", analiseGlobal.pop],
+        ["Classe Social", analiseGlobal.classe],
+        ["Densidade (hab/km2)", analiseGlobal.densidadeHab],
+        ["Oportunidade (Adensamento)", Math.round(adensDataGlobal.perc) + "%"],
+        ["", ""]
+      ];
+
+      const concData = [
+        ["INVENTÁRIO DE CONCORRENTES", "", ""],
+        ["Nome", "Tipo", "Localização"]
+      ];
+      concorrentes.forEach(c => {
+        concData.push([c.name, "Lavanderia", c.vicinity || "N/A"]);
+      });
+
+      const superData = [
+        ["", "", ""],
+        ["INVENTÁRIO DE SUPERMERCADOS", "", ""],
+        ["Nome", "Rating", "Reviews"]
+      ];
+      supermercados.forEach(s => {
+        superData.push([s.name, s.rating || 0, s.user_ratings_total || 0]);
+      });
+
+      const pombaisData = [
+        ["", "", ""],
+        ["MORADIAS VERTICAIS DETECTADAS", "", ""],
+        ["Nome", "Tipo", "Observação"]
+      ];
+      todosMarcadores.filter(m => m.category === 'pombais').forEach(m => {
+        pombaisData.push([m.title, "Conjunto Habitacional", m.obs || "N/A"]);
+      });
+
+      const fullData = [...resumo, ...concData, ...superData, ...pombaisData];
+      const ws = XLSX.utils.aoa_to_sheet(fullData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Dados de Expansão");
+
+      // Estilo básico (opcional se quiser usar XLSX Style, mas mantemos compatibilidade)
+      XLSX.writeFile(wb, `Relatorio_Lavai_${analiseGlobal.pontuacao}pct.xlsx`);
     }
-    
-    // Remover classes de processamento do toast
-    document.getElementById("analysisToast").classList.remove("ai-processing", "loading-pulse");
-    
-    updateUI();
-  }
 
-  function exportarPDF() {
-    if (!analiseGlobal) return alert("Gere a análise primeiro!");
-    const element = document.getElementById("reportContainer");
-    const pdfHide = document.getElementById("pdfHide");
-    
-    pdfHide.style.display = "none";
-
-    const opt = {
-      margin: [10, 10],
-      filename: `Relatorio_Lavai_${analiseGlobal.pontuacao}%.pdf`,
-      image: { type: 'jpeg', quality: 1 },
-      html2canvas: { scale: 3, backgroundColor: '#161A23', useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    html2pdf().set(opt).from(element).save().then(() => {
-      pdfHide.style.display = "flex";
-    });
-  }
-
-  function exportarRelatorioCompleto() {
-    if (!analiseGlobal) return alert("Gere a análise primeiro!");
-    
-    const resumo = [
-      ["INTELIGÊNCIA DE EXPANSÃO LAVAÍ", ""],
-      ["Endereço", analiseGlobal.endereco],
-      ["Score Final", analiseGlobal.pontuacao + "%"],
-      ["Veredito", analiseGlobal.vereditoTexto],
-      ["População Estimada", analiseGlobal.pop],
-      ["Classe Social", analiseGlobal.classe],
-      ["Densidade (hab/km2)", analiseGlobal.densidadeHab],
-      ["", ""]
-    ];
-
-    const concData = [
-      ["INVENTÁRIO DE CONCORRENTES", "", ""],
-      ["Nome", "Tipo", "Localização"]
-    ];
-    concorrentes.forEach(c => {
-      const isSelf = selfServiceKeywords.some(kw => (c.name||"").toLowerCase().includes(kw));
-      concData.push([c.name, isSelf ? "Autosserviço" : "Convencional", c.vicinity || "N/A"]);
-    });
-
-    const superData = [
-      ["", "", ""],
-      ["INVENTÁRIO DE SUPERMERCADOS", "", ""],
-      ["Nome", "Rating", "Reviews"]
-    ];
-    supermercados.forEach(s => {
-      superData.push([s.name, s.rating || 0, s.user_ratings_total || 0]);
-    });
-
-    const pombaisData = [
-      ["", "", ""],
-      ["MORADIAS VERTICAIS DETECTADAS", "", ""],
-      ["Nome", "Tipo", "Observação"]
-    ];
-    todosMarcadores.filter(m => m.category === 'pombais').forEach(m => {
-      pombaisData.push([m.title, "Conjunto Habitacional", m.obs || "N/A"]);
-    });
-
-    const fullData = [...resumo, ...concData, ...superData, ...pombaisData];
-    const ws = XLSX.utils.aoa_to_sheet(fullData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dados de Expansão");
-    
-    // Estilo básico (opcional se quiser usar XLSX Style, mas mantemos compatibilidade)
-    XLSX.writeFile(wb, `Relatorio_Lavai_${analiseGlobal.pontuacao}pct.xlsx`);
-  }
-</script>
-<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBBYgZYvQbrGjs9oxulIly4D0OjSnokX5s&libraries=places,geometry,visualization&callback=initMap"></script>
+    // Initialize Map
+    window.onload = initMap;
+  </script>
 </body>
+
 </html>
